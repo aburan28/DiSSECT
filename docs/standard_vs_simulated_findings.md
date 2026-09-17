@@ -232,8 +232,10 @@ analysis above changes until they are computed** -- what follows is what they
 flag when run over the curves the database already holds.
 
 **`extension_degree`** factors the degree *m* of the field over its prime field.
-A composite *m* admits proper subfields, the precondition for a Weil descent
-(GHS) transfer. Seven standard curves have one:
+Every extension contains its prime field, including when *m* is prime; composite
+*m* additionally admits nontrivial intermediate fields.  These are possible
+targets for a Weil descent (GHS) transfer, not proof that a useful descent
+exists. Seven standard curves have nontrivial intermediate fields:
 
 | curve | *m* | factorization | largest proper divisor |
 |---|---|---|---|
@@ -247,8 +249,9 @@ A composite *m* admits proper subfields, the precondition for a Weil descent
 
 F₂¹⁵⁵ and F₂¹⁸⁵ are the fields the GHS analyses of Menezes-Qu and
 Maurer-Menezes-Teske singled out. Every NIST and SECG binary curve is
-prime-degree, which the trait now records as a property rather than leaving
-implicit.
+prime-degree, so its only proper subfield is F₂.  Known GHS analyses conclude
+that the prime-degree cases of cryptographic size they study are infeasible;
+the field-degree trait alone cannot establish that conclusion.
 
 **`subfield_curve`** finds the smallest subfield containing both coefficients.
 When it is proper, Frobenius is an endomorphism and Pollard rho gains

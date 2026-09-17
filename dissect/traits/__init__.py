@@ -30,6 +30,7 @@ from .prime_shape import PrimeShapeTrait
 from .group_structure import GroupStructureTrait
 from .montgomery_form import MontgomeryFormTrait
 from .cm_discriminant_size import CMDiscriminantSizeTrait
+from .cheon import CheonTrait
 
 TRAITS = dict(
     map(
@@ -66,6 +67,7 @@ TRAITS = dict(
             GroupStructureTrait,
             MontgomeryFormTrait,
             CMDiscriminantSizeTrait,
+            CheonTrait,
         ],
     )
 )
