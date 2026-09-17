@@ -159,6 +159,50 @@ One curve in this entire study crosses LOF 1.5, and it is a **simulated** one:
 `x962_sim_224_0xbd71344799d5c7fcdc45b59fa3b9ab8f6aaf2982` at 1.546. No standard
 curve comes close.
 
+## Binary-field curves
+
+These cannot be tested by this method, for two independent reasons. Both are
+worth stating with numbers, because "untested" reads like an oversight and this
+is a hard limit of the available data.
+
+**There is no simulated binary curve anywhere in the database.** Every simulated
+category is entirely prime-field:
+
+| category | curves | field types |
+|---|---|---|
+| x962_sim | 123,455 | Prime only |
+| bn_sim | 68,130 | Prime only |
+| brainpool_sim | 9,862 | Prime only |
+| random | 131,617 | Prime only |
+| c25519_sim / nums_sim / bls_sim | 784 / 708 / 54 | Prime only |
+
+That is 0 binary curves out of roughly 334,000 simulated ones, so there is no
+population to compare a binary curve against. The generation code is not in this
+repository either, so the gap cannot be filled from here.
+
+**The standard binary curves are too few and too fragmented to compare among
+themselves.** There are 64 binary records across `x962`, `secg`, `nist`,
+`oakley` and `wtls`, but deduplicating on field, coefficients and order leaves
+**41 distinct curves** spread over 19 field sizes. The largest group at any one
+size is 6. LOF defaults to 20 neighbours; nothing here supports a density
+estimate at any parameter setting.
+
+The duplication is heavy, and mirrors the prime-field case:
+
+```
+nist:K-163 == secg:sect163k1 == wtls:wap-wsg-idm-ecid-wtls3 == x962:ansix9t163k1
+nist:B-233 == secg:sect233r1 == x962:ansit233r1
+nist:K-571 == secg:sect571k1 == x962:ansit571k1
+   ... 12 such groups in total
+```
+
+What is *not* the obstacle: the traits themselves. All 21 compute on binary
+curves and the results are populated in the database (for the 30 `x962` binary
+records: `multiples_x` 300 rows, `volcano` 240, `torsion_extension` 210, all
+with usable data). So this is purely a missing-baseline problem. Generating a
+simulated binary pool per standard would make these curves testable with the
+existing traits and the existing script; nothing else would need to change.
+
 ### What cannot be tested
 
 The comparison is guarded on the prime field, and the script excludes and
@@ -166,7 +210,8 @@ reports curves that fail that guard. The Koblitz `k1` curves — `secp160k1`,
 `secp192k1`, `secp224k1`, `secp256k1` — sit at the same bitlengths as their
 `r1` siblings but over *different* primes, so no simulated pool here is
 comparable to them. `secp256k1`, the Bitcoin curve, is therefore untested, as
-are `secp160r2` and every binary-field curve.
+is `secp160r2`. Binary-field curves are untestable for a separate reason, set
+out above.
 
 ## Bugs found and fixed
 
