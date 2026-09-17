@@ -511,11 +511,17 @@ moves anything:
 
 | pool | full pool | cofactor-1 pool |
 |---|---|---|
-| ansix9p256r1 | 57.6th pct (rank 7837/18503) | 59.2nd pct (rank 3328/8161) |
-| ansix9p192r1 | 31.9st pct (rank 12826/18837) | 33.5rd pct (rank 5552/8349) |
+| ansix9p256r1 | 57.6th pct (rank 7837/18503) | 52.2nd pct (rank 3905/8161) |
+| ansix9p192r1 | 31.9st pct (rank 12826/18837) | 34.3rd pct (rank 5487/8349) |
 
 The confound is real and it does not change the verdict. `--cofactor` on
 `dissect-standard_vs_simulated` reproduces the conditioned comparison.
+
+An earlier version of this section gave the conditioned figures as 59.2 and
+33.5. Those were computed with the scaling leak recorded below, where the
+cofactor filter ran after the features had already been scaled over the
+unfiltered pool, and they are wrong. The 256-bit figure in particular moves by
+seven percentile points once the filter is applied in the right place.
 
 ### The percentiles, tested rather than eyeballed
 
@@ -554,6 +560,18 @@ set by having one or two standard curves per bitlength — not by the method, an
 not fixable by adding traits.
 
 ## Bugs found and fixed
+
+**A filter applied after scaling, three times.** `scale_feature` min-max scales
+over whatever rows it is given, so any row dropped afterwards has still set the
+range. That has now gone wrong three separate ways in this work: missing trait
+results imputed to `-1.0` outside the scaled range; the prime-field guard
+excluding Koblitz curves only after they had set the ranges; and `--cofactor`
+doing the same for cofactor-2 and cofactor-4 curves, distorting precisely the
+cofactor-correlated traits it exists to condition out. All three produced
+output that looked entirely reasonable, which is what makes the class
+dangerous. `build_features` now takes every such filter as `standard_curves` or
+`restrict_to` and applies it before the trait loop; nothing should filter the
+frame it returns. The last of the three was reported by Cursor Bugbot.
 
 **Excluded curves still set the feature scale.** The field guard that drops
 curves over a different prime ran *after* `build_features` had min-max scaled
