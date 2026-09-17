@@ -57,8 +57,14 @@ precondition central.
 ## Measured subgroup-order profiles
 
 The table uses the exact subgroup orders shipped by OpenSSL 3.0.13 and complete
-Sage factorizations of `r - 1` and `r + 1`.  For every divisor on both sides it
-computes
+factorizations of `r - 1` and `r + 1` verified with Sage.  The P-521 row is the
+one stated exception: its complete `r - 1` factorization already demonstrates
+the listed attack, while the available `r + 1` factorization is incomplete.
+The row is therefore not a certificate that the listed profile is optimal.
+The P-521 `r - 1` decomposition is also published in
+[Appendix A.5 of ePrint 2017/055](https://eprint.iacr.org/2017/055.pdf); this
+review uses its factor data, not the paper's parallel-work accounting.  For
+every available divisor it computes
 
 `C(u) = u + sqrt(r/u)`.
 
@@ -75,18 +81,32 @@ obtaining oracle answers are omitted.
 | NIST P-192 | 96.000 | + | 76.627 | 57.686 | 76.627 | 19.373 |
 | NIST P-224 | 112.000 | + | 47.278 | 88.361 | 88.361 | 23.639 |
 | NIST P-256 | 128.000 | - | 84.664 | 85.668 | 86.252 | 41.748 |
+| NIST P-384 | 192.000 | - | 103.347 | 140.327 | 140.327 | 51.673 |
+| NIST P-521 [*] | 260.500 | - | 130.480 | 195.260 | 195.260 | 65.240 |
 | secp160k1 | 80.000 | + | 47.331 | 56.335 | 56.337 | 23.663 |
 | secp192k1 | 96.000 | + | 58.876 | 66.562 | 66.569 | 29.431 |
 | secp224k1 | 112.000 | + | 78.170 | 72.915 | 78.207 | 33.793 |
 | secp256k1 | 128.000 | - | 84.764 | 85.618 | 86.253 | 41.747 |
 
+[*] P-521 uses the complete `r - 1` factorization only; searching a future
+completion of `r + 1` can only improve, not invalidate, this demonstrated
+profile.
+
 The P-256 and secp256k1 rows are almost perfectly balanced around the
 one-third exponent.  So are the Brainpool rows in the practical sense relevant
-to this coarse asymptotic model.  But the 256-bit attacks require about `2^85`
-chosen oracle answers.  That is not a practical break of ordinary ECDSA or
-ephemeral ECDH, nor of static ECDH that validates inputs and exposes only the
-output of a one-way KDF.  It is a serious parameter-selection fact for protocols
-whose security model really supplies the auxiliary inputs.
+to this coarse asymptotic model.  P-224 and P-384 have valid but less balanced
+profiles.  P-521 is **not immune** to the attack family: its best divisor from
+the complete `r - 1` factorization has size about `2^130.480`, giving about
+`2^195.260` offline work instead of the `2^260.500` generic baseline.  What is
+true is narrower: this divisor is far from the balanced target
+`r^(1/3) ~= 2^173.667`, and the attack needs an extraordinary number of oracle
+answers.  The unresolved `r + 1` factorization also means that this audit cannot
+certify P-521 as Cheon-resistant.
+
+These attacks are not practical breaks of ordinary ECDSA or ephemeral ECDH,
+nor of static ECDH that validates inputs and exposes only the output of a
+one-way KDF.  They are serious parameter-selection facts for protocols whose
+security model really supplies the auxiliary inputs.
 
 For P-256, imposing a query cap changes the result as follows.  Each row picks
 the best divisor that fits under the cap; the listed query count can be slightly
