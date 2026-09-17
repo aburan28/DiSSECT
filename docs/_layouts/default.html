@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+<meta name="description" content="{{ page.description | default: site.description | strip_newlines }}">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1c1e21; --muted: #5c6370; --rule: #e3e6ea;
+    --accent: #0b5fff; --code-bg: #f5f6f8; --table-head: #f8f9fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --fg: #e6e8eb; --muted: #9aa3ad; --rule: #2b2f36;
+      --accent: #7aa7ff; --code-bg: #1c1f25; --table-head: #1a1d22;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
+  header.site {
+    border-bottom: 1px solid var(--rule); margin-bottom: 2.5rem;
+    padding: 1.1rem 0; font-size: .9rem;
+  }
+  header.site .inner { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem;
+    display: flex; gap: 1.25rem; align-items: baseline; flex-wrap: wrap; }
+  header.site a { color: var(--fg); text-decoration: none; }
+  header.site a.home { font-weight: 600; }
+  header.site a:hover { color: var(--accent); }
+  header.site .spacer { flex: 1; }
+  h1, h2, h3 { line-height: 1.25; font-weight: 650; }
+  h1 { font-size: 1.9rem; margin: 0 0 1.5rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.3rem; margin: 2.75rem 0 1rem; padding-top: 1.25rem;
+       border-top: 1px solid var(--rule); }
+  h3 { font-size: 1.05rem; margin: 2rem 0 .75rem; }
+  a { color: var(--accent); }
+  code {
+    background: var(--code-bg); padding: .12em .35em; border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .875em;
+  }
+  pre {
+    background: var(--code-bg); padding: .9rem 1rem; border-radius: 6px;
+    overflow-x: auto; font-size: .82rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 1.25rem 0; font-size: .9rem; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--rule); padding: .4rem .6rem; text-align: left; }
+  th { background: var(--table-head); font-weight: 600; }
+  blockquote { margin: 1.25rem 0; padding-left: 1rem; border-left: 3px solid var(--rule); color: var(--muted); }
+  hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+  footer.site { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--rule);
+                color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="inner">
+    <a class="home" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    <span class="spacer"></span>
+    <a href="{{ '/standard_vs_simulated_findings.html' | relative_url }}">Findings</a>
+    <a href="https://github.com/aburan28/DiSSECT">Repository</a>
+    <a href="https://dissect.crocs.fi.muni.cz/">Database</a>
+  </div>
+</header>
+<main class="wrap">
+{{ content }}
+<footer class="site">
+  Analysis notes for <a href="https://github.com/aburan28/DiSSECT">aburan28/DiSSECT</a>,
+  computed against the public database at
+  <a href="https://dissect.crocs.fi.muni.cz/">dissect.crocs.fi.muni.cz</a>.
+</footer>
+</main>
+</body>
+</html>
