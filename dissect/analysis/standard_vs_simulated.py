@@ -63,7 +63,11 @@ def build_features(source, category, bits, traits=None, sim_category=None):
     categories = [category, sim_category or f"{category}_sim"]
     query = {"category": categories, "bits": [str(bits)], "cofactors": "all", "example": None}
 
-    curves = dp.get_curves(source, query)[["curve", "category"]]
+    curves = dp.get_curves(source, query)
+    if curves.empty:
+        # An unmatched query yields a columnless frame, so select nothing from it.
+        return pd.DataFrame(columns=["curve", "category"])
+    curves = curves[["curve", "category"]]
     for name in traits or sorted(TRAITS):
         try:
             trait_df = dp.get_trait(source, name, query, False)
