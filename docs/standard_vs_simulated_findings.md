@@ -331,6 +331,49 @@ documented design constraint into a measured quantity, and confirm the simulatio
 honours it — which is a check on the null model rather than on the curves, and
 the null model is the part this whole comparison rests on.
 
+## Three further traits, and one deliberately not added
+
+**`group_structure`** reports the invariant factors of *E*(F_q). A curve whose
+cofactor is divisible by a square may be cyclic or Z/n₁ × Z/n₂, and `cofactor`
+cannot tell those apart. This has real room to vary: the 256-bit X9.62 pool
+splits 8,160 / 6,152 / 4,190 across cofactors 1 / 2 / 4. Within a prime-order
+pool such as Brainpool's it is constant by force.
+
+**`montgomery_form`** reports whether the curve is birationally equivalent to a
+Montgomery curve, and so to a twisted Edwards curve — the property behind the
+x-only ladder, which also forces 4 | #*E*. The criterion is that the cubic
+*x*³ + *ax* + *b* has a root α with 3α² + *a* a nonzero square.
+
+**`prime_shape`** measures how sparse the field size is in non-adjacent form. A
+prime chosen for fast reduction is a short signed sum of powers of two; one with
+no such structure sits near bitlength/3. Unlike the other two this describes the
+*field*, so it is constant within any simulated pool and contributes nothing to a
+standard-versus-simulated comparison. Its use is screening across the database,
+and there it separates the two design philosophies cleanly:
+
+| family | curves | median NAF density |
+|---|---|---|
+| NIST | 5 | 0.0134 |
+| djb | 10 | 0.0134 |
+| Brainpool | 14 | 0.3333 |
+
+P-521 has NAF weight **2** — it is 2⁵²¹ − 1. Curve25519's prime is 2²⁵⁵ − 19, at
+weight 4. The Brainpool primes, derived from the digits of π precisely so that
+nothing about them is chosen, sit at density 0.3333, which is the value expected
+of a prime with no structure at all. That is the intended trade stated as a
+number: Brainpool gives up fast reduction to buy provenance.
+
+### The trait not added
+
+An anomalous-or-supersingular flag would be the obvious safety trait, and it is
+not here. Measured across the database, **no curve is either** — 0 anomalous and
+0 supersingular among the 18,502 256-bit X9.62 simulated curves, the 18,836
+192-bit ones, the 1,677 Brainpool ones, and all 131,617 in the `random`
+category. A trait that cannot take a second value distinguishes nothing and
+screens nothing; it would be dropped by the coverage filter on every run. The
+generation procedures reject these curves, which is the point of them, so the
+flag records a property of the procedures rather than of the curves.
+
 ## Bugs found and fixed
 
 **Excluded curves still set the feature scale.** The field guard that drops

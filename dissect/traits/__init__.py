@@ -26,6 +26,9 @@ from .subfield_curve import SubfieldCurveTrait
 from .automorphisms import AutomorphismsTrait
 from .twist_embedding import TwistEmbeddingTrait
 from .sato_tate import SatoTateTrait
+from .prime_shape import PrimeShapeTrait
+from .group_structure import GroupStructureTrait
+from .montgomery_form import MontgomeryFormTrait
 
 TRAITS = dict(
     map(
@@ -58,6 +61,9 @@ TRAITS = dict(
             AutomorphismsTrait,
             TwistEmbeddingTrait,
             SatoTateTrait,
+            PrimeShapeTrait,
+            GroupStructureTrait,
+            MontgomeryFormTrait,
         ],
     )
 )
