@@ -374,6 +374,46 @@ screens nothing; it would be dropped by the coverage filter on every run. The
 generation procedures reject these curves, which is the point of them, so the
 flag records a property of the procedures rather than of the curves.
 
+## `cm_discriminant_size`, and two candidates measured and rejected
+
+`discriminant` already reports the CM discriminant *D*, but as a several-hundred-bit
+signed integer it is close to useless as a feature: min-max scaling such a value
+preserves almost nothing. The ratio of bit lengths, |*D*| against *q*, is the
+comparable quantity, and it separates two ways of building a curve by two orders
+of magnitude:
+
+| family | median \|*D*\| bits | median field bits | ratio |
+|---|---|---|---|
+| bls | 2 | 381 | 0.005 |
+| bn | 2 | 222 | 0.009 |
+| mnt | 8 | 240 | 0.033 |
+| brainpool | 210 | 208 | 1.010 |
+| nist | 258 | 256 | 1.008 |
+| x962_sim | 256 | 256 | 1.000 |
+| brainpool_sim | 258 | 256 | 1.008 |
+
+A curve built by complex multiplication starts from a chosen tiny discriminant
+and solves for a field: the pairing families sit at *D* = −3, two bits, whatever
+the field size. A curve found by hashing a seed takes whatever discriminant it
+gets, which is the size of the field. Like `prime_shape` this is a screening
+trait, not a distinguisher — every seed-generated pool sits at ratio 1.0 by
+construction, so within a pool it says nothing.
+
+### Two candidates that did not survive measurement
+
+**Size of the *j*-invariant.** A curve chosen for a small *j* would be notable.
+Measured over the 18,502-curve 256-bit X9.62 pool, the mean ratio of *j*'s bit
+length to the field's is 0.9961 and the smallest in the entire pool is 0.9453 —
+*j* is uniform, exactly as it should be, and there is nothing to detect.
+
+**Hamming weight of the group order.** This one is confounded rather than empty.
+Since |*t*| ≤ 2√*q*, the top half of *n*'s bits are simply *p*'s bits, and *p* is
+fixed within a pool, so the statistic mostly measures the field. The signature is
+visible in the numbers: the Brainpool pool's standard deviation of 0.0219 is the
+halved variance you get when only the low half of the bits are free. A trait
+whose value is dominated by a quantity held constant across the comparison is
+not worth having.
+
 ## Bugs found and fixed
 
 **Excluded curves still set the feature scale.** The field guard that drops
