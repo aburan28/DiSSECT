@@ -1,3 +1,11 @@
+---
+layout: default
+title: Findings
+description: >-
+  No standard curve is an outlier; the substantive findings were three
+  preprocessing defects that manufacture apparent structure.
+---
+
 # Standard vs. simulated curves: analysis notes
 
 Run against the public database at `https://dissect.crocs.fi.muni.cz/`
@@ -221,11 +229,11 @@ own. None of them has results in the public database yet, so **nothing in the
 analysis above changes until they are computed** -- what follows is what they
 flag when run over the curves the database already holds.
 
-**`extension_degree`** factors the degree $m$ of the field over its prime field.
-A composite $m$ admits proper subfields, the precondition for a Weil descent
+**`extension_degree`** factors the degree *m* of the field over its prime field.
+A composite *m* admits proper subfields, the precondition for a Weil descent
 (GHS) transfer. Seven standard curves have one:
 
-| curve | $m$ | factorization | largest proper divisor |
+| curve | *m* | factorization | largest proper divisor |
 |---|---|---|---|
 | oakley:Oakley Group 3 | 155 | 5 · 31 | 31 |
 | x962:c2pnb176w1 | 176 | 2⁴ · 11 | 88 |
@@ -242,19 +250,19 @@ implicit.
 
 **`subfield_curve`** finds the smallest subfield containing both coefficients.
 When it is proper, Frobenius is an endomorphism and Pollard rho gains
-$\sqrt{m/d}$. Eighteen records (the `K-*`, `sect*k1` and `ansit*k1` aliases plus
-two WTLS curves) have $d = 1$, losing between 3.41 bits (113-bit) and 4.58 bits
+√(*m*/*d*). Eighteen records (the `K-*`, `sect*k1` and `ansit*k1` aliases plus
+two WTLS curves) have *d* = 1, losing between 3.41 bits (113-bit) and 4.58 bits
 (571-bit). This is deliberate and documented in the standards; the point is that
 the trait set previously could not distinguish these curves from their `B-*`
 siblings on this axis.
 
-**`automorphisms`** derives $|\mathrm{Aut}(E)|$ from the $j$-invariant and the
+**`automorphisms`** derives |Aut(*E*)| from the *j*-invariant and the
 field, and reports the resulting rho margin. Over a prime field the extra
 automorphisms exist only when the field holds the matching roots of unity, so
-the trait tests $q \bmod 3$ and $q \bmod 4$ rather than the $j$-invariant alone.
-Five database curves have $|\mathrm{Aut}| = 6$: `secp160k1`, `secp192k1`,
+the trait tests *q* mod 3 and *q* mod 4 rather than the *j*-invariant alone.
+Five database curves have |Aut| = 6: `secp160k1`, `secp192k1`,
 `secp224k1`, `secp256k1` and `Fp254BNa`, each losing 0.79 bits. For `secp256k1`
-this is the same $j = 0$ structure that gives it the GLV endomorphism.
+this is the same *j* = 0 structure that gives it the GLV endomorphism.
 
 **`twist_embedding`** computes the embedding degree of the quadratic twist with
 respect to the largest prime factor of its cardinality. `twist_order` already

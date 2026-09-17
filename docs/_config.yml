@@ -1,0 +1,19 @@
+title: "DiSSECT: standard vs. simulated curves"
+
+# A project site is served from https://<user>.github.io/DiSSECT/, and Jekyll
+# does not infer that: without an explicit baseurl every `relative_url` link
+# resolves to the domain root and 404s.
+baseurl: "/DiSSECT"
+url: "https://aburan28.github.io"
+description: >-
+  Notes from an analysis of standardised elliptic curves against their
+  simulated counterparts, including the negative result and the
+  preprocessing defects found along the way.
+
+# Stale internal notes: `howto_create_trait` describes the pre-rename
+# `curve_analyzer` package and scripts that no longer exist, and
+# `division_early_abort` is a scratch benchmark. Neither belongs on a
+# published page, so they stay in the repository but out of the build.
+exclude:
+  - division_early_abort
+  - howto_create_trait

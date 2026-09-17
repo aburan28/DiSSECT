@@ -1,0 +1,66 @@
+---
+layout: default
+title: Overview
+---
+
+# Standard vs. simulated elliptic curves
+
+These are working notes from running [DiSSECT](https://github.com/crocs-muni/DiSSECT)
+against its public database of 334,858 curves, asking a narrow question: do the
+standardised curves look unusual next to curves generated the same way?
+
+**They do not.** Across Brainpool, X9.62, NIST and SECG — every standard with a
+comparable simulated pool — no standard curve reaches the conventional Local
+Outlier Factor threshold of 1.5. The single curve in the whole study that
+crosses it is a *simulated* one.
+
+[Read the full findings →]({{ '/standard_vs_simulated_findings.html' | relative_url }})
+
+## What was actually interesting
+
+The negative result is the boring part, and it is also weak evidence: there are
+only one or two standard curves per bitlength, which is a description of where a
+handful of points fall rather than a powered test.
+
+The substantive findings were three preprocessing defects, each able to
+manufacture structure that is not in the curves:
+
+- **Missing trait results imputed as `-1.0`**, outside the `[0, 1]` range every
+  real feature is scaled into, so an *uncomputed* trait read as a maximally
+  extreme value. Run this way, both standard X9.62 curves come out as the single
+  most extreme curve in their population.
+- **Excluded curves still setting the feature scale**, because the prime-field
+  guard ran after min-max scaling rather than before.
+- **Two database records of one curve disagreeing** on trait coverage, and so on
+  their scores.
+
+The first of these points squarely at the conclusion a motivated reader would
+most like to reach — that the standardised curves are special. It is an artefact.
+
+## Reproducing it
+
+Analysis needs no SageMath; computing traits does.
+
+```shell
+git clone --recurse-submodules https://github.com/aburan28/DiSSECT.git
+cd DiSSECT && python -m venv venv && source venv/bin/activate
+pip install .
+
+# the corrected comparison
+dissect-standard_vs_simulated --category brainpool --bits 160 192 224 256
+
+# and the artefact it guards against
+dissect-standard_vs_simulated --category x962 --bits 256 --no-coverage-filter
+```
+
+## The limit worth keeping in view
+
+This method asks whether a curve looks unusual *among curves generated the same
+way, on the properties the traits measure*. It is structurally blind to a
+weakness that no trait names — which is the scenario behind the seed-provenance
+concern in the first place. A curve selected for such a weakness passes every
+trait by construction.
+
+`secp256k1` and all binary-field curves are untested here for a separate and
+more mundane reason: nothing in the database is a valid comparison population
+for them.
