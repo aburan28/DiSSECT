@@ -35,6 +35,7 @@ dissect-feature_builder = "dissect.analysis.feature_builder:main"
 dissect-feature_outliers = "dissect.analysis.feature_outliers:main"
 dissect-feature_clusters = "dissect.analysis.feature_clusters:main"
 dissect-feature_detail = "dissect.analysis.feature_detail:main"
+dissect-standard_vs_simulated = "dissect.analysis.standard_vs_simulated:main"
 
 [tool.setuptools.package-data]
 "dissect.utils.kohel.mod" = ["*.dbz"]

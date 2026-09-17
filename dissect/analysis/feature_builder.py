@@ -83,13 +83,18 @@ def main():
     except FileNotFoundError:
         curves = dp.get_curves(source, args)[keep_columns]
 
+    trait_df = None
     for i in range(3):
         try:
             trait_df = dp.get_trait(source, trait, args, False)
             break
-        except:
-            print(f"Reconnecting attempt {i} ...")
+        except Exception as error:
+            print(f"Reconnecting attempt {i} ({type(error).__name__}: {error}) ...", file=sys.stderr)
             sleep(10)
+
+    if trait_df is None:
+        print(f"Failed to fetch trait '{trait}' from {source}", file=sys.stderr)
+        sys.exit(1)
 
     for feature in TRAITS[trait].numeric_outputs():
         dp.clean_feature(trait_df, feature)

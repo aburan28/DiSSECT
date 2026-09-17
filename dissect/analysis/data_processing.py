@@ -71,7 +71,21 @@ def get_trait(source: str, trait_name: str, query: Dict[str, Any] = {}, skip_fai
         trait_results = filter(lambda x: "NO DATA (timed out)" not in x.values(), trait_results)
         trait_results = filter(lambda x: "INVALID DATA Ran out of input" not in x.values(), trait_results)
 
-    return pd.DataFrame(trait_results).convert_dtypes()
+    return _convert_dtypes_safe(pd.DataFrame(trait_results))
+
+
+def _convert_dtypes_safe(df):
+    """`convert_dtypes` on a column of arbitrary-precision integers raises
+    OverflowError, since pandas tries to fit them into a C long. Trait outputs
+    such as curve orders or x-coordinates routinely exceed 64 bits, so convert
+    column by column and leave the offending ones as plain objects. The
+    downstream feature cleaning converts them via `Decimal` anyway."""
+    for column in df.columns:
+        try:
+            df[column] = df[column].convert_dtypes()
+        except (OverflowError, TypeError, ValueError):
+            pass
+    return df
 
 
 def get_curve_categories(source: str):
