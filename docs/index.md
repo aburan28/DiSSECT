@@ -16,7 +16,15 @@ crosses it is a *simulated* one.
 
 [Read the full findings →]({{ '/standard_vs_simulated_findings.html' | relative_url }})
 
+[Read the attack-oriented curve-selection review →]({{ '/curve_selection_security_review.html' | relative_url }})
+
 ## What was actually interesting
+
+The outlier result is not a curve-security verdict.  In particular, the
+Brown-Gallant-Cheon `O(r^(1/3))` condition was not represented by the original
+traits.  The selection review now measures it against the prime subgroup order,
+keeps its static-scalar/auxiliary-input precondition explicit, and separates it
+from `L(1/3)` descent and finite-field attacks.
 
 The negative result is the boring part, and it is also weak evidence: there are
 only one or two standard curves per bitlength, which is a description of where a
