@@ -223,8 +223,10 @@ out above.
 
 ## Traits added: structural properties the original set does not measure
 
-Four properties that bear directly on the difficulty of the discrete logarithm
-were not measured by any of the original 22 traits. They are now traits of their
+Five properties that bear directly on the difficulty of the discrete logarithm,
+or on reading the trace against a null, were not measured by any of the original
+22 traits. The first four are below; the fifth, `sato_tate`, has a section of its
+own. They are now traits of their
 own. None of them has results in the public database yet, so **nothing in the
 analysis above changes until they are computed** -- what follows is what they
 flag when run over the curves the database already holds.
@@ -278,6 +280,56 @@ seed with its tail varied -- so the comparison really does ask whether the chose
 seed stands out among its neighbours. But it can only ever answer "not on the
 properties measured". A curve selected for a weakness no trait names passes every
 trait by construction. That is the shape of the problem, not a gap in the list.
+
+## The normalized trace, and what it exposes about Brainpool
+
+The original traits record the Frobenius trace (`trace_factorization`) but never
+normalize it, so there was no way to ask the obvious distributional question:
+does a standard curve's trace sit where the theory says it should? The
+`sato_tate` trait supplies that, as τ = *t* / 2√*q*, which the Hasse bound puts
+in [−1, 1] and which Birch's theorem makes **semicircular** over a fixed field
+with the coefficients varying.
+
+The X9.62 pool matches that null almost exactly. A semicircle on [−1, 1] has
+mean 0 and standard deviation exactly 1/2:
+
+| pool | *n* | mean τ | sd τ |
+|---|---|---|---|
+| x962_sim 192-bit | 18,836 | −0.0041 | 0.4994 |
+| x962_sim 256-bit | 18,502 | +0.0005 | 0.5029 |
+
+**Brainpool does not**, and the deviation is not subtle — mean τ ≈ +0.42 at every
+bitlength, with not one negative value in the entire pool:
+
+| pool | *n* | mean τ | sd τ | τ < 0 |
+|---|---|---|---|---|
+| brainpool_sim 160-bit | 3,184 | 0.4262 | 0.2665 | 0 |
+| brainpool_sim 192-bit | 2,640 | 0.4174 | 0.2625 | 0 |
+| brainpool_sim 224-bit | 2,361 | 0.4200 | 0.2653 | 0 |
+| brainpool_sim 256-bit | 1,677 | 0.4192 | 0.2650 | 0 |
+
+The cause is a design requirement, not an anomaly. Brainpool requires the group
+order to be smaller than the field: #*E* = *q* + 1 − *t* < *q* forces *t* > 1,
+which is exactly τ > 0. Every simulated Brainpool curve satisfies it (1,677 of
+1,677 at 256-bit), every standard Brainpool curve satisfies it, and half the
+X9.62 pool does not (9,274 of 18,502), because X9.62 imposes no such condition.
+
+A semicircle conditioned on τ > 0 has mean 4/3π = 0.4244 and standard deviation
+√(1/4 − (4/3π)²) = 0.2643. The observed 0.419–0.426 and 0.263–0.267 match to
+three decimals. So the simulation reproduces Brainpool's constraint faithfully,
+and the trait recovers it from the data alone.
+
+Against that conditioned null the standard Brainpool curves are unremarkable —
+percentiles 28.9, 67.3, 58.4 and 65.4 at 160, 192, 224 and 256 bits. The X9.62
+curves likewise: 63.0 for `ansix9p192r1` and 58.1 for `ansix9p256r1`. The one
+mildly high value, `prime192v2` at 95.5, is one curve out of three at that
+bitlength and carries no weight on its own.
+
+This is worth separating into its two parts. As a *distinguisher* the trait finds
+nothing, consistent with everything else here. What it does do is turn a
+documented design constraint into a measured quantity, and confirm the simulation
+honours it — which is a check on the null model rather than on the curves, and
+the null model is the part this whole comparison rests on.
 
 ## Bugs found and fixed
 

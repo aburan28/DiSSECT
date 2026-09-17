@@ -25,6 +25,7 @@ from .extension_degree import ExtensionDegreeTrait
 from .subfield_curve import SubfieldCurveTrait
 from .automorphisms import AutomorphismsTrait
 from .twist_embedding import TwistEmbeddingTrait
+from .sato_tate import SatoTateTrait
 
 TRAITS = dict(
     map(
@@ -56,6 +57,7 @@ TRAITS = dict(
             SubfieldCurveTrait,
             AutomorphismsTrait,
             TwistEmbeddingTrait,
+            SatoTateTrait,
         ],
     )
 )
