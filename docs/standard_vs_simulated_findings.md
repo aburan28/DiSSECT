@@ -480,6 +480,79 @@ there is now a test pinning that down.
 a multiplicative order modulo its largest prime factor, which is a much heavier
 computation than the two above, and no shortcut was available here.
 
+## Testing the null model, and the negative result as an actual test
+
+Two things had gone untested: whether the simulated pool is the right null at
+all, and whether the standard curves' percentiles are *statistically* ordinary
+rather than merely looking it.
+
+### The X9.62 null is broader than the standard's own practice
+
+Every one of the **10** standard X9.62 prime curves has cofactor 1. Its simulated
+pool does not:
+
+| pool | cofactor 1 | cofactor 2 | cofactor 4 |
+|---|---|---|---|
+| x962_sim 256-bit | 8,160 (44%) | 6,152 (33%) | 4,190 (23%) |
+| x962_sim 192-bit | 8,348 (44%) | 6,329 (34%) | 4,159 (22%) |
+
+So 56% of the pool consists of curves the standard's practice would never have
+selected, and the standard curve therefore differs from its null on cofactor and
+on everything correlated with it — group structure, rational 2-torsion,
+Montgomery representability, the parity of the order. That is a confound, not a
+finding, and it needed checking rather than assuming.
+
+Brainpool has no such problem: its pool is 100% cofactor 1, matching its
+standard, and the `sato_tate` section above shows the pool also honours
+Brainpool's #*E* < *p* requirement. Its null is well matched.
+
+Conditioning the X9.62 pool on cofactor 1 and redoing the comparison barely
+moves anything:
+
+| pool | full pool | cofactor-1 pool |
+|---|---|---|
+| ansix9p256r1 | 57.6th pct (rank 7837/18503) | 59.2nd pct (rank 3328/8161) |
+| ansix9p192r1 | 31.9st pct (rank 12826/18837) | 33.5rd pct (rank 5552/8349) |
+
+The confound is real and it does not change the verdict. `--cofactor` on
+`dissect-standard_vs_simulated` reproduces the conditioned comparison.
+
+### The percentiles, tested rather than eyeballed
+
+Under exchangeability — the null that a standard curve is just another curve
+from its pool — each curve's rank is uniform, so its percentile *is* an exact
+p-value, and the percentiles can be tested jointly. Taking one curve per family
+and bitlength, counting aliases once (P-192 = secp192r1 = ansix9p192r1) and
+dropping the Brainpool `t1` twins as non-independent, leaves nine observations:
+49.3, 30.2, 1.6, 68.3, 32.5, 57.0, 59.4, 81.1, 92.9.
+
+- Mean percentile **52.5**, against 50 predicted.
+- Kolmogorov-Smirnov against Uniform(0,1): **D = 0.19, p = 0.84**.
+- Sign test: 5 of 9 above the median, **p = 1.00**.
+
+No evidence of anomaly. The separate per-feature scan points the other way
+again: 49 of 1,295 comparisons in the 5% tail where 130 are expected. The
+binomial p-value for that deficit is tiny, but the comparisons are correlated
+and share pools, so treat the direction as robust and the magnitude as not.
+
+### What the test could have caught
+
+This is the part worth stating, because "p = 0.84" invites the wrong reading.
+Simulating the KS test at *n* = 9 against shifted alternatives:
+
+| standard curves average | power at α = 0.05 |
+|---|---|
+| 58.8th percentile | 0.14 |
+| 66.7th | 0.37 |
+| 75.2nd | 0.70 |
+| 83.3rd | 0.93 |
+
+Only a gross shift would be caught reliably. A bias that put the standard curves
+at the 60th percentile on average would go unnoticed six times in seven. So the
+result is *no evidence of an anomaly*, not evidence of none, and the ceiling is
+set by having one or two standard curves per bitlength — not by the method, and
+not fixable by adding traits.
+
 ## Bugs found and fixed
 
 **Excluded curves still set the feature scale.** The field guard that drops

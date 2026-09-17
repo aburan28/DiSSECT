@@ -62,6 +62,21 @@ def matching_field_curves(source, category, sim_category, bits):
     return usable, skipped
 
 
+def _curves_with_cofactor(source, categories, bits, cofactor):
+    """Names of curves in `categories` at `bits` whose cofactor is `cofactor`."""
+    keep = set()
+    for category in categories:
+        query = {"category": [category], "bits": [str(bits)]}
+        if source.startswith("mongodb"):
+            records = dp.database.get_curves(dp.database.connect(source), query)
+        else:
+            url = f"{source}db/curves?category={category}&bits={bits}"
+            with urllib.request.urlopen(url) as handle:
+                records = json.loads(handle.read())["data"]
+        keep.update(r["name"] for r in records if int(r["cofactor"]) == cofactor)
+    return keep
+
+
 def build_features(source, category, bits, traits=None, sim_category=None, standard_curves=None):
     """Join per-trait results for `category` and the simulated pool into one frame.
 
@@ -149,6 +164,11 @@ def main():
                              "so x962_sim is their counterpart.")
     parser.add_argument("--bits", type=int, nargs="+", default=[256])
     parser.add_argument("--source", default="https://dissect.crocs.fi.muni.cz/")
+    parser.add_argument("--cofactor", type=int, default=None,
+                        help="restrict both sides to curves of this cofactor. The X9.62 pool "
+                             "spans cofactors 1, 2 and 4 while every standard X9.62 curve has "
+                             "cofactor 1, so the unrestricted pool is a broader null than the "
+                             "standard's own practice.")
     parser.add_argument("--max-missing", type=float, default=0.05,
                         help="drop a feature if more than this fraction of simulated curves lack it")
     parser.add_argument("--no-coverage-filter", action="store_true",
@@ -171,6 +191,16 @@ def main():
         if (df.category == args.category).sum() == 0:
             print("  no standard curves at this bitlength")
             continue
+
+        if args.cofactor is not None:
+            keep = _curves_with_cofactor(args.source, [args.category, sim_category],
+                                         bits, args.cofactor)
+            before = len(df)
+            df = df[df.curve.isin(keep)]
+            print(f"  cofactor {args.cofactor} only: {before} -> {len(df)} curves")
+            if (df.category == args.category).sum() == 0:
+                print("  no standard curves left at this cofactor")
+                continue
 
         every = [c for c in df.columns if c not in ("curve", "category")]
         features = every if args.no_coverage_filter else usable_features(
