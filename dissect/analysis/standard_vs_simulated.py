@@ -77,11 +77,17 @@ def _curves_with_cofactor(source, categories, bits, cofactor):
     return keep
 
 
-def build_features(source, category, bits, traits=None, sim_category=None, standard_curves=None):
+def build_features(source, category, bits, traits=None, sim_category=None, standard_curves=None,
+                   restrict_to=None):
     """Join per-trait results for `category` and the simulated pool into one frame.
 
     `standard_curves`, when given, restricts the standard side to those names
     before scaling, so excluded curves cannot set the feature ranges.
+
+    `restrict_to` narrows *both* sides the same way, and for the same reason. Any
+    curve dropped after `scale_feature` has run would still have set that
+    feature's range, which silently defeats the point of excluding it -- so
+    every such filter has to be applied here rather than to the returned frame.
     """
     sim_category = sim_category or f"{category}_sim"
     query = {"category": [category, sim_category], "bits": [str(bits)], "cofactors": "all", "example": None}
@@ -93,6 +99,8 @@ def build_features(source, category, bits, traits=None, sim_category=None, stand
     curves = curves[["curve", "category"]]
     if standard_curves is not None:
         curves = curves[curves.curve.isin(standard_curves) | (curves.category == sim_category)]
+    if restrict_to is not None:
+        curves = curves[curves.curve.isin(restrict_to)]
     for name in traits or sorted(TRAITS):
         try:
             trait_df = dp.get_trait(source, name, query, False)
@@ -186,21 +194,17 @@ def main():
             if not usable:
                 print("  no standard curves share the simulated pool's field")
                 continue
+        restrict_to = None
+        if args.cofactor is not None:
+            restrict_to = _curves_with_cofactor(args.source, [args.category, sim_category],
+                                                bits, args.cofactor)
+            print(f"  restricted to cofactor {args.cofactor}: {len(restrict_to)} curves")
+
         df = build_features(args.source, args.category, bits, sim_category=sim_category,
-                            standard_curves=usable)
+                            standard_curves=usable, restrict_to=restrict_to)
         if (df.category == args.category).sum() == 0:
             print("  no standard curves at this bitlength")
             continue
-
-        if args.cofactor is not None:
-            keep = _curves_with_cofactor(args.source, [args.category, sim_category],
-                                         bits, args.cofactor)
-            before = len(df)
-            df = df[df.curve.isin(keep)]
-            print(f"  cofactor {args.cofactor} only: {before} -> {len(df)} curves")
-            if (df.category == args.category).sum() == 0:
-                print("  no standard curves left at this cofactor")
-                continue
 
         every = [c for c in df.columns if c not in ("curve", "category")]
         features = every if args.no_coverage_filter else usable_features(
