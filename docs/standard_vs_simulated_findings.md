@@ -126,23 +126,34 @@ P-192 and P-256.
 |---|---|---|---|---|
 | secp128r1 | 128 | 1.016 | 14683/36128 | 36,126 |
 | secp128r2 | 128 | 1.035 | 6816/36128 | 36,126 |
-| secp160r1 | 160 | 1.053 | 1963/27781 | 27,780 |
+| secp160r1 | 160 | 1.060 | 1561/27781 | 27,780 |
 | P-192 | 192 | 0.999 | 13963/18837 | 18,836 |
-| secp192r1 | 192 | 0.998 | 14185/18837 | 18,836 |
+| secp192r1 | 192 | 1.000 | 13416/18837 | 18,836 |
 | P-224 | 224 | 1.061 | 2561/22212 | 22,211 |
-| secp224r1 | 224 | 1.039 | 4401/22212 | 22,211 |
+| secp224r1 | 224 | 1.061 | 2561/22212 | 22,211 |
 | P-256 | 256 | 1.017 | 8446/18503 | 18,502 |
-| secp256r1 | 256 | 1.042 | 4215/18503 | 18,502 |
+| secp256r1 | 256 | 1.017 | 8446/18503 | 18,502 |
 
-Again nothing is an outlier. `secp160r1` at the 93rd percentile and `P-224` at
-the 88th are the most elevated, but LOF 1.05–1.06 is ordinary variation.
+Again nothing is an outlier. `secp160r1` at the 94th percentile and `P-224` at
+the 88th are the most elevated, but LOF 1.06 is ordinary variation.
 
-`P-192`/`secp192r1` and `P-224`/`secp224r1` are each one curve reached through
-two category paths; the small differences (0.999 vs 0.998, 1.061 vs 1.039) come
-from the coverage filter keeping slightly different feature sets depending on
-which category's trait rows are populated. Treat that spread as the method's
-own noise floor — it is about as large as the differences being measured, which
-is a further reason not to read individual percentiles as meaningful.
+`P-224`/`secp224r1` and `P-256`/`secp256r1` are each one curve reached through
+two category paths, and each pair scores *identically* (1.061 at rank
+2561/22212, and 1.017 at rank 8446/18503). That is what a correct pipeline
+should give, and it makes a useful end-to-end check.
+
+An earlier version of these notes reported those pairs as differing and put the
+gap down to the method's own noise floor. That was wrong. The gap was the
+scaling defect recorded below: the NIST queries had no `k1` curve to exclude and
+so were never affected, while the SECG ones were. Once excluded curves stop
+setting the feature ranges, the disagreement disappears.
+
+`P-192`/`secp192r1` still differ slightly (0.999 at rank 13963 against 1.000 at
+rank 13416), and that one is real with a mundane cause: they are separate
+database records, and the `nist:P-192` record has no `kn_factorization` results
+for `k = 1`, so the coverage filter keeps 110 features for it against 112 for
+`secg:secp192r1`. It is the same coverage unevenness as everywhere else here,
+showing up between two records of one curve.
 
 One curve in this entire study crosses LOF 1.5, and it is a **simulated** one:
 `x962_sim_224_0xbd71344799d5c7fcdc45b59fa3b9ab8f6aaf2982` at 1.546. No standard
@@ -158,6 +169,16 @@ comparable to them. `secp256k1`, the Bitcoin curve, is therefore untested, as
 are `secp160r2` and every binary-field curve.
 
 ## Bugs found and fixed
+
+**Excluded curves still set the feature scale.** The field guard that drops
+curves over a different prime ran *after* `build_features` had min-max scaled
+every trait over the unfiltered set. `scale_feature` scales over whatever rows
+it is handed, so the Koblitz `k1` curves defined the feature ranges for the very
+curves they were excluded from being compared against — backwards, since the
+reason to exclude them is that they are structurally different. The filter now
+applies before any scaling. This changed the SECG numbers above, which record
+the corrected values. Reported by Cursor Bugbot.
+
 
 **`convert_dtypes()` overflows on arbitrary-precision trait outputs.**
 `get_trait` called `convert_dtypes()` on the whole frame; pandas tries to fit
