@@ -26,6 +26,7 @@ import pandas as pd
 from sklearn.neighbors import LocalOutlierFactor
 
 import dissect.analysis.data_processing as dp
+import dissect.utils.database_handler as database
 from dissect.traits import TRAITS
 
 IMPUTED = -1.0
@@ -40,6 +41,9 @@ def matching_field_curves(source, category, sim_category, bits):
     simulated pool and must be excluded rather than compared across fields.
     """
     def fetch(cat):
+        if source.startswith("mongodb"):
+            query = {"category": [cat], "bits": [str(bits)]}
+            return list(database.get_curves(database.connect(source), query))
         url = f"{source}db/curves?category={cat}&bits={bits}"
         with urllib.request.urlopen(url) as handle:
             return json.loads(handle.read())["data"]
@@ -58,16 +62,22 @@ def matching_field_curves(source, category, sim_category, bits):
     return usable, skipped
 
 
-def build_features(source, category, bits, traits=None, sim_category=None):
-    """Join per-trait results for `category` and the simulated pool into one frame."""
-    categories = [category, sim_category or f"{category}_sim"]
-    query = {"category": categories, "bits": [str(bits)], "cofactors": "all", "example": None}
+def build_features(source, category, bits, traits=None, sim_category=None, standard_curves=None):
+    """Join per-trait results for `category` and the simulated pool into one frame.
+
+    `standard_curves`, when given, restricts the standard side to those names
+    before scaling, so excluded curves cannot set the feature ranges.
+    """
+    sim_category = sim_category or f"{category}_sim"
+    query = {"category": [category, sim_category], "bits": [str(bits)], "cofactors": "all", "example": None}
 
     curves = dp.get_curves(source, query)
     if curves.empty:
         # An unmatched query yields a columnless frame, so select nothing from it.
         return pd.DataFrame(columns=["curve", "category"])
     curves = curves[["curve", "category"]]
+    if standard_curves is not None:
+        curves = curves[curves.curve.isin(standard_curves) | (curves.category == sim_category)]
     for name in traits or sorted(TRAITS):
         try:
             trait_df = dp.get_trait(source, name, query, False)
@@ -81,6 +91,7 @@ def build_features(source, category, bits, traits=None, sim_category=None):
             dp.clean_feature(trait_df, feature)
 
         flat = dp.flatten_trait(name, trait_df)
+        flat = flat[flat.curve.isin(curves.curve)].copy()
         features = [c for c in flat.columns if c != "curve"]
         for feature in features:
             dp.scale_feature(flat, feature)
@@ -147,6 +158,7 @@ def main():
     for bits in args.bits:
         print(f"\n=== {args.category} {bits}-bit ===")
         sim_category = args.sim_category or f"{args.category}_sim"
+        usable = None
         if args.sim_category:
             usable, skipped = matching_field_curves(args.source, args.category, sim_category, bits)
             if skipped:
@@ -154,9 +166,8 @@ def main():
             if not usable:
                 print("  no standard curves share the simulated pool's field")
                 continue
-        df = build_features(args.source, args.category, bits, sim_category=sim_category)
-        if args.sim_category:
-            df = df[df.curve.isin(usable) | (df.category == sim_category)]
+        df = build_features(args.source, args.category, bits, sim_category=sim_category,
+                            standard_curves=usable)
         if (df.category == args.category).sum() == 0:
             print("  no standard curves at this bitlength")
             continue
