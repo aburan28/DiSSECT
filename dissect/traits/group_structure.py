@@ -87,6 +87,15 @@ def test_first_invariant_is_the_smaller_one():
     assert structure_from_invariants([4, 8])["first_invariant"] == 4
 
 
+def test_invariant_order_does_not_matter():
+    """Sage returns $n_1 \\mid n_2$; PARI's ellgroup returns $d_2 \\mid d_1$, the other way
+    round. Both were checked against the same curve, so neither ordering may
+    change the answer."""
+    big = 57896044605178124381348723474703786764780934384905001694504830219963657932518
+    assert structure_from_invariants([big, 2]) == structure_from_invariants([2, big])
+    assert structure_from_invariants([big, 2])["first_invariant"] == 2
+
+
 def test_cofactor_four_can_go_either_way():
     # The point of the trait: identical cofactor, different structure.
     cyclic = structure_from_invariants([4 * 1009])

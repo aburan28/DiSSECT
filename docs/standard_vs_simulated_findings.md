@@ -414,6 +414,69 @@ halved variance you get when only the low half of the bits are free. A trait
 whose value is dominated by a quantity held constant across the comparison is
 not worth having.
 
+## Executing the Sage-dependent traits with PARI
+
+`montgomery_form`, `group_structure` and `twist_embedding` were written against
+SageMath and so had never been run — only their pure-Python cores were tested.
+PARI/GP supplies the same primitives (`polrootsmod` for the Montgomery cubic,
+`ellgroup` for the group structure), so two of the three have now been executed
+against real curves.
+
+### `montgomery_form`
+
+Run over all **110** prime-field Weierstrass curves in the standard categories.
+Six are Montgomery-representable:
+
+| curve | cofactor |
+|---|---|
+| djb:Curve1174 | 4 |
+| other:Curve22103 | 8 |
+| other:Curve4417 | 4 |
+| other:Curve67254 | 4 |
+| secg:secp112r2 | 4 |
+| secg:secp128r2 | 4 |
+
+These are the curves one would expect: the Curve1174 and Curve22103/4417/67254
+family are Edwards and Montgomery designs, and the two SECG curves are the
+cofactor-4 members of their family. Two consistency checks passed with no
+exceptions: no curve was accepted whose cofactor is not divisible by 4, and all
+**100** cofactor-1 curves were rejected, as a Montgomery form would require
+4 | #*E*.
+
+A third check fell out of the same data. The number of roots of
+*x*³ + *ax* + *b* gives the rational 2-torsion, so the cofactor's parity and the
+root count must agree, and across all 110 curves they do: every even cofactor has
+exactly one root and every odd cofactor none.
+
+### `group_structure`
+
+Every one of the 110 standard prime-field curves is **cyclic** — none has full
+rational 2-torsion. That is unsurprising, since 100 of them have prime order and
+are cyclic by force, but it does mean the trait says nothing about the standard
+curves themselves.
+
+It is not vacuous in the pools, though. Among 300 cofactor-4 curves sampled from
+the 256-bit X9.62 simulated pool, **75 are non-cyclic** and 225 are cyclic — so
+the trait has real variation exactly where the cofactor admits it, which is what
+it was added for.
+
+The two computations were cross-checked against each other. For eight simulated
+curves, the prediction from the cubic's root count was compared with what PARI's
+`ellgroup` returns independently: all four predicted non-cyclic came back as
+[*d*₁, 2], and all four predicted cyclic came back as a single invariant.
+**Eight of eight.**
+
+That cross-check also caught a portability trap. PARI returns the invariants as
+*d*₂ | *d*₁ and Sage as *n*₁ | *n*₂ — opposite orders. The trait takes the
+minimum rather than the first element, so it is already correct either way, and
+there is now a test pinning that down.
+
+### Still unexecuted
+
+`twist_embedding` remains unrun. It needs a factorization of the twist order and
+a multiplicative order modulo its largest prime factor, which is a much heavier
+computation than the two above, and no shortcut was available here.
+
 ## Bugs found and fixed
 
 **Excluded curves still set the feature scale.** The field guard that drops
@@ -450,6 +513,7 @@ the analysis, and the second disguises why.
 - Standard curves per bitlength number 1–2. These ranks describe where those
   specific curves fall; they are not a powered hypothesis test, and no single
   curve's percentile should be read as meaningful on its own.
+- `twist_embedding` has still never been executed; see above.
 - LOF over 100+ correlated, partly discrete features is a blunt instrument.
   The negative result is robust (no standard curve comes near the threshold,
   and the only curve that crosses it is a simulated one); a positive result
