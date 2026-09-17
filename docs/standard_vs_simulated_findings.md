@@ -213,6 +213,64 @@ comparable to them. `secp256k1`, the Bitcoin curve, is therefore untested, as
 is `secp160r2`. Binary-field curves are untestable for a separate reason, set
 out above.
 
+## Traits added: structural properties the original set does not measure
+
+Four properties that bear directly on the difficulty of the discrete logarithm
+were not measured by any of the original 22 traits. They are now traits of their
+own. None of them has results in the public database yet, so **nothing in the
+analysis above changes until they are computed** -- what follows is what they
+flag when run over the curves the database already holds.
+
+**`extension_degree`** factors the degree $m$ of the field over its prime field.
+A composite $m$ admits proper subfields, the precondition for a Weil descent
+(GHS) transfer. Seven standard curves have one:
+
+| curve | $m$ | factorization | largest proper divisor |
+|---|---|---|---|
+| oakley:Oakley Group 3 | 155 | 5 · 31 | 31 |
+| x962:c2pnb176w1 | 176 | 2⁴ · 11 | 88 |
+| oakley:Oakley Group 4 | 185 | 5 · 37 | 37 |
+| x962:c2pnb208w1 | 208 | 2⁴ · 13 | 104 |
+| x962:c2pnb272w1 | 272 | 2⁴ · 17 | 136 |
+| x962:c2pnb304w1 | 304 | 2⁴ · 19 | 152 |
+| x962:c2pnb368w1 | 368 | 2⁴ · 23 | 184 |
+
+F₂¹⁵⁵ and F₂¹⁸⁵ are the fields the GHS analyses of Menezes-Qu and
+Maurer-Menezes-Teske singled out. Every NIST and SECG binary curve is
+prime-degree, which the trait now records as a property rather than leaving
+implicit.
+
+**`subfield_curve`** finds the smallest subfield containing both coefficients.
+When it is proper, Frobenius is an endomorphism and Pollard rho gains
+$\sqrt{m/d}$. Eighteen records (the `K-*`, `sect*k1` and `ansit*k1` aliases plus
+two WTLS curves) have $d = 1$, losing between 3.41 bits (113-bit) and 4.58 bits
+(571-bit). This is deliberate and documented in the standards; the point is that
+the trait set previously could not distinguish these curves from their `B-*`
+siblings on this axis.
+
+**`automorphisms`** derives $|\mathrm{Aut}(E)|$ from the $j$-invariant and the
+field, and reports the resulting rho margin. Over a prime field the extra
+automorphisms exist only when the field holds the matching roots of unity, so
+the trait tests $q \bmod 3$ and $q \bmod 4$ rather than the $j$-invariant alone.
+Five database curves have $|\mathrm{Aut}| = 6$: `secp160k1`, `secp192k1`,
+`secp224k1`, `secp256k1` and `Fp254BNa`, each losing 0.79 bits. For `secp256k1`
+this is the same $j = 0$ structure that gives it the GLV endomorphism.
+
+**`twist_embedding`** computes the embedding degree of the quadratic twist with
+respect to the largest prime factor of its cardinality. `twist_order` already
+gives that cardinality but not its MOV degree, and a fault or invalid-point
+attack is precisely what lands the attacker on the twist.
+
+### What this does not fix
+
+Adding traits sharpens the question without changing its shape. The simulated
+seeds are drawn from the neighbourhood of the standard seed -- the `x962_sim`
+192-bit seeds all begin `0x3045ae6fc8422f64ed579528d38120eae12196`, the P-192
+seed with its tail varied -- so the comparison really does ask whether the chosen
+seed stands out among its neighbours. But it can only ever answer "not on the
+properties measured". A curve selected for a weakness no trait names passes every
+trait by construction. That is the shape of the problem, not a gap in the list.
+
 ## Bugs found and fixed
 
 **Excluded curves still set the feature scale.** The field guard that drops

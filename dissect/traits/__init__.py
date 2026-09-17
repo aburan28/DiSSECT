@@ -21,6 +21,10 @@ from .multiples_x import MultiplesXTrait
 from .x962_invariant import X962InvariantTrait
 from .brainpool_overlap import BrainpoolOverlapTrait
 from .weierstrass import WeierstrassTrait
+from .extension_degree import ExtensionDegreeTrait
+from .subfield_curve import SubfieldCurveTrait
+from .automorphisms import AutomorphismsTrait
+from .twist_embedding import TwistEmbeddingTrait
 
 TRAITS = dict(
     map(
@@ -48,6 +52,10 @@ TRAITS = dict(
             X962InvariantTrait,
             BrainpoolOverlapTrait,
             WeierstrassTrait,
+            ExtensionDegreeTrait,
+            SubfieldCurveTrait,
+            AutomorphismsTrait,
+            TwistEmbeddingTrait,
         ],
     )
 )
