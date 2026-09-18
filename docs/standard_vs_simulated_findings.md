@@ -550,6 +550,50 @@ standard seed would close that gap; nothing else here would need to change.
 Brainpool cannot be checked this way at all: the database records seeds for the
 simulated Brainpool curves but not for the standard ones.
 
+### The pools explore different-sized spaces
+
+X9.62 and Brainpool derive different things from their seeds, and the pools
+reflect that exactly:
+
+| pool | distinct *a* | distinct *b* | *a* = −3 |
+|---|---|---|---|
+| x962_sim 256-bit | **1** | 18,502 | 18,502 / 18,502 |
+| x962_sim 192-bit | **1** | 18,836 | 18,836 / 18,836 |
+| brainpool_sim 256-bit | 1,677 | 1,677 | 0 / 1,677 |
+| brainpool_sim 192-bit | 2,640 | 2,640 | 0 / 2,640 |
+
+Both are faithful. X9.62 fixes *a* = −3 for fast point doubling and derives only
+*b* from the seed, so its pool is a **one-parameter family**; Brainpool derives
+both coefficients, so its pool is two-parameter. It is worth saying plainly
+anyway: the X9.62 comparison searches a 1-dimensional slice of curve space, not
+the full space, and no result from it says anything about curves off that slice.
+
+The convention is widespread but splits cleanly by purpose. Of 115 standard
+prime curves, 55 use *a* = −3: all of NIST, X9.62, NUMS, ANSSI and OSCCA, most of
+SECG and GOST — and **none** of the pairing families, where `bn`, `mnt` and `bls`
+are 0 for 35 curves between them, because a CM construction fixes the
+coefficients rather than choosing them.
+
+One mismatch falls out of this. The seven Brainpool `t1` curves have *a* = −3,
+while their entire simulated pool has *a* ≠ −3 — the simulation models the `r1`
+generation, which is the one the seeds describe. Traits reading *a* or *b*
+directly (`weierstrass`, `x962_invariant`, `brainpool_overlap`) therefore compare
+a `t1` curve against a pool that cannot contain anything like it. Order-based
+traits are unaffected, because each `t1` curve shares its `r1` sibling's order —
+which is also why the `t1` curves are excluded from the test below as
+non-independent.
+
+### The pools contain no hidden duplicates
+
+Checked because the rank test assumes the simulated curves are genuinely
+distinct. Across the 256- and 192-bit X9.62 pools and the 256-bit Brainpool pool,
+there are **no repeated (a, b) pairs, no repeated cardinalities and no repeated
+j-invariants** — 18,502 of 18,502, 18,836 of 18,836 and 1,677 of 1,677 all
+distinct. No two curves in a pool are isogenous, which is what a repeated
+cardinality would mean. Chance collisions were never expected over a Hasse
+interval of width 2¹³⁰, but a generation defect would not have been a chance
+event.
+
 ### The percentiles, tested rather than eyeballed
 
 Under exchangeability — the null that a standard curve is just another curve
