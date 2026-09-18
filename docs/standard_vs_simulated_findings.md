@@ -480,7 +480,276 @@ there is now a test pinning that down.
 a multiplicative order modulo its largest prime factor, which is a much heavier
 computation than the two above, and no shortcut was available here.
 
+## Testing the null model, and the negative result as an actual test
+
+Two things had gone untested: whether the simulated pool is the right null at
+all, and whether the standard curves' percentiles are *statistically* ordinary
+rather than merely looking it.
+
+### The X9.62 null is broader than the standard's own practice
+
+Every one of the **10** standard X9.62 prime curves has cofactor 1. Its simulated
+pool does not:
+
+| pool | cofactor 1 | cofactor 2 | cofactor 4 |
+|---|---|---|---|
+| x962_sim 256-bit | 8,160 (44%) | 6,152 (33%) | 4,190 (23%) |
+| x962_sim 192-bit | 8,348 (44%) | 6,329 (34%) | 4,159 (22%) |
+
+So 56% of the pool consists of curves the standard's practice would never have
+selected, and the standard curve therefore differs from its null on cofactor and
+on everything correlated with it — group structure, rational 2-torsion,
+Montgomery representability, the parity of the order. That is a confound, not a
+finding, and it needed checking rather than assuming.
+
+Brainpool has no such problem: its pool is 100% cofactor 1, matching its
+standard, and the `sato_tate` section above shows the pool also honours
+Brainpool's #*E* < *p* requirement. Its null is well matched.
+
+Conditioning the X9.62 pool on cofactor 1 and redoing the comparison barely
+moves anything:
+
+| pool | full pool | cofactor-1 pool |
+|---|---|---|
+| ansix9p256r1 | 57.6th pct (rank 7837/18503) | 52.2nd pct (rank 3905/8161) |
+| ansix9p192r1 | 31.9st pct (rank 12826/18837) | 34.3rd pct (rank 5487/8349) |
+
+The confound is real and it does not change the verdict. `--cofactor` on
+`dissect-standard_vs_simulated` reproduces the conditioned comparison.
+
+An earlier version of this section gave the conditioned figures as 59.2 and
+33.5. Those were computed with the scaling leak recorded below, where the
+cofactor filter ran after the features had already been scaled over the
+unfiltered pool, and they are wrong. The 256-bit figure in particular moves by
+seven percentile points once the filter is applied in the right place.
+
+### The simulated pools are one-sided in seed space
+
+The X9.62 simulation increments from the standard seed, and only upward. Every
+simulated seed lies above the standard's:
+
+| pool | standard seed | first simulated seed | seeds below |
+|---|---|---|---|
+| x962_sim 192-bit | `…e12196d5` | `…e121980c` (+311) | 0 of 18,836 |
+| x962_sim 256-bit | `…819f7e90` | `…819f8032` (+418) | 0 of 18,502 |
+
+This is **not** a bias. SHA-1 makes the curve at seed *s* independent of the
+curve at *s* + *k*, which the data bears out: over the 18,502-curve 256-bit pool,
+seed offset correlates with the normalized trace at *r* = −0.004 (*p* = 0.59,
+Spearman *p* = 0.56), and the cofactor mix in the first half of the seed range
+matches the second (χ², *p* = 0.56). An upward-only sample is therefore still
+exchangeable with the standard curve, and every percentile above stands.
+
+It is a limit on what can be *asked*. The provenance concern is not only "is this
+curve unusual" but "how many acceptable curves did the generator pass over before
+stopping at this one" — and the curves before the standard seed are the ones that
+would answer it. They are absent from the pool by construction, so no analysis
+over this database can address search effort. Generating downward from the
+standard seed would close that gap; nothing else here would need to change.
+
+Brainpool cannot be checked this way at all: the database records seeds for the
+simulated Brainpool curves but not for the standard ones.
+
+### The pools explore different-sized spaces
+
+X9.62 and Brainpool derive different things from their seeds, and the pools
+reflect that exactly:
+
+| pool | distinct *a* | distinct *b* | *a* = −3 |
+|---|---|---|---|
+| x962_sim 256-bit | **1** | 18,502 | 18,502 / 18,502 |
+| x962_sim 192-bit | **1** | 18,836 | 18,836 / 18,836 |
+| brainpool_sim 256-bit | 1,677 | 1,677 | 0 / 1,677 |
+| brainpool_sim 192-bit | 2,640 | 2,640 | 0 / 2,640 |
+
+Both are faithful. X9.62 fixes *a* = −3 for fast point doubling and derives only
+*b* from the seed, so its pool is a **one-parameter family**; Brainpool derives
+both coefficients, so its pool is two-parameter. It is worth saying plainly
+anyway: the X9.62 comparison searches a 1-dimensional slice of curve space, not
+the full space, and no result from it says anything about curves off that slice.
+
+The convention is widespread but splits cleanly by purpose. Of 115 standard
+prime curves, 55 use *a* = −3: all of NIST, X9.62, NUMS, ANSSI and OSCCA, most of
+SECG and GOST — and **none** of the pairing families, where `bn`, `mnt` and `bls`
+are 0 for 35 curves between them, because a CM construction fixes the
+coefficients rather than choosing them.
+
+One mismatch falls out of this. The seven Brainpool `t1` curves have *a* = −3,
+while their entire simulated pool has *a* ≠ −3 — the simulation models the `r1`
+generation, which is the one the seeds describe. Traits reading *a* or *b*
+directly (`weierstrass`, `x962_invariant`, `brainpool_overlap`) therefore compare
+a `t1` curve against a pool that cannot contain anything like it. Order-based
+traits are unaffected, because each `t1` curve shares its `r1` sibling's order —
+which is also why the `t1` curves are excluded from the test below as
+non-independent.
+
+### The pools contain no hidden duplicates
+
+Checked because the rank test assumes the simulated curves are genuinely
+distinct. Across the 256- and 192-bit X9.62 pools and the 256-bit Brainpool pool,
+there are **no repeated (a, b) pairs, no repeated cardinalities and no repeated
+j-invariants** — 18,502 of 18,502, 18,836 of 18,836 and 1,677 of 1,677 all
+distinct. No two curves in a pool are isogenous, which is what a repeated
+cardinality would mean. Chance collisions were never expected over a Hasse
+interval of width 2¹³⁰, but a generation defect would not have been a chance
+event.
+
+### `field_representation`: how a binary field is actually built
+
+`prime_shape` measures how sparse the field size is, but over a binary field
+*q* = 2^*m* is a single bit however the field is built, so it says nothing there.
+The counterpart is the polynomial defining the extension, and it is a real design
+axis no trait covered.
+
+Run over the 64 binary standard records:
+
+| terms | count | meaning |
+|---|---|---|
+| 3 | 29 | trinomial — the fastest reduction |
+| 5 | 31 | pentanomial |
+| 15 | 2 | normal basis |
+| 23 | 2 | normal basis |
+
+Two things fall out that are worth naming.
+
+**Four curves are not using a polynomial basis at all.** The 15- and 23-term
+entries are `c2onb191v4`, `c2onb191v5`, `c2onb239v4` and `c2onb239v5`, whose
+degrees run 191, 190, 188, 184, 176, 160, … — powers of two subtracted from the
+top, the signature of a Gaussian normal basis rather than a reduction polynomial.
+The `onb` in their names is exactly that. A curve represented this way is not
+interchangeable with a polynomial-basis curve of the same field size, and nothing
+else in the trait set distinguishes them.
+
+**Standards disagree on how to build the same field.** At *m* = 163 there are two
+incompatible pentanomials in deployed use:
+
+| polynomial | curves |
+|---|---|
+| *x*¹⁶³ + *x*⁷ + *x*⁶ + *x*³ + 1 | `B-163`, `K-163`, `sect163k1`, `sect163r1`, `sect163r2`, `wtls3`, `ansit163r2`, `ansix9t163k1` |
+| *x*¹⁶³ + *x*⁸ + *x*² + *x* + 1 | `c2pnb163v1`, `c2pnb163v2`, `c2pnb163v3`, `wtls5` |
+
+The same split appears at *m* = 191 and *m* = 239, the latter carrying three
+different representations across standards. Field elements are not portable
+between them, so this is a fragmentation of F₂¹⁶³ into two non-interoperable
+encodings rather than a property of any one curve.
+
+The `reduction_degree` output records the second-highest degree, which governs
+how far a carry out of the top propagates. The 163-bit curves sit at 7, while
+`sect239k1` reaches 158 — a materially slower reduction for a comparable field
+size.
+
+### The percentiles, tested rather than eyeballed
+
+Under exchangeability — the null that a standard curve is just another curve
+from its pool — each curve's rank is uniform, so its percentile *is* an exact
+p-value, and the percentiles can be tested jointly. Taking one curve per family
+and bitlength, counting aliases once (P-192 = secp192r1 = ansix9p192r1) and
+dropping the Brainpool `t1` twins as non-independent, leaves nine observations:
+49.3, 30.2, 1.6, 68.3, 32.5, 57.0, 59.4, 81.1, 92.9.
+
+- Mean percentile **52.5**, against 50 predicted.
+- Kolmogorov-Smirnov against Uniform(0,1): **D = 0.19, p = 0.84**.
+- Sign test: 5 of 9 above the median, **p = 1.00**.
+
+No evidence of anomaly. The separate per-feature scan points the other way
+again: 49 of 1,295 comparisons in the 5% tail where 130 are expected. The
+binomial p-value for that deficit is tiny, but the comparisons are correlated
+and share pools, so treat the direction as robust and the magnitude as not.
+
+### What the test could have caught
+
+This is the part worth stating, because "p = 0.84" invites the wrong reading.
+Simulating the KS test at *n* = 9 against shifted alternatives:
+
+| standard curves average | power at α = 0.05 |
+|---|---|
+| 58.8th percentile | 0.14 |
+| 66.7th | 0.37 |
+| 75.2nd | 0.70 |
+| 83.3rd | 0.93 |
+
+Only a gross shift would be caught reliably. A bias that put the standard curves
+at the 60th percentile on average would go unnoticed six times in seven. So the
+result is *no evidence of an anomaly*, not evidence of none, and the ceiling is
+set by having one or two standard curves per bitlength — not by the method, and
+not fixable by adding traits.
+
+## A supervised distinguisher, and the two things it found instead
+
+The natural next question is whether a classifier can *learn* the difference
+between standard and simulated curves, rather than waiting for one to stick
+out under LOF. `dissect-ml_distinguisher` does that: it trains logistic
+regression and gradient-boosted trees to separate the standard curves of a
+family from their pools, scores each standard curve with a model that never
+saw it, and reports the leave-one-out AUC. Because the positive class is six
+curves (SECG) or four (Brainpool `r1`), the AUC alone is uninterpretable, so
+the same procedure runs on a null: random simulated curves are relabelled as
+"standard" and scored the same way, and the observed AUC is compared against
+that distribution.
+
+The first run looked like a result. Gradient boosting on SECG reached AUC 0.69
+and gave secp128r1 and secp224r1 an out-of-fold P(standard) of 1.000;
+logistic regression on Brainpool reached 0.96. Both were artefacts, and both
+are worth recording because a distinguisher is exactly the tool that finds
+them.
+
+**The simulator keeps the smaller root of *b*.** The X9.62 procedure derives
+*b* from the seed only up to sign: it asks for a solution of *b*²·*r* ≡ *a*³
+(mod *p*), and there are two, *b* and *p* − *b*. Every one of the 18,502 to
+36,126 simulated X9.62 curves at each bitlength has *b* < *p*/2 (maximum
+0.5000·*p*), so the simulator canonicalises to the smaller root. The standards
+did not: secp128r1 has *b* = 0.908·*p* and secp224r1 has *b* = 0.703·*p*. After
+min-max scaling those two curves sit at exactly 1.0 on `weierstrass_b`, above
+the whole pool, and a tree splits on it. Since every pool prime is 3 mod 4,
+the two roots are not isomorphic curves but quadratic twists of each other, so
+this is a genuine gap in the simulated space — the pool never contains a curve
+whose *larger* root passed the order test — but not a property of the
+standard curves, which fall on either side as a coin flip would. The
+Brainpool simulator has no such convention (34% of its curves have
+*b* > *p*/2). `weierstrass_b` is dropped from the classifier, and removing it
+from the LOF feature set moves secp128r1 from the 59th to the 12th percentile
+while shifting every other SECG curve by under three points.
+
+**Brainpool `t1` is `r1`.** The two are the same curve up to isomorphism and
+share every trait value. Leaving `brainpoolP256t1` out of training while
+`brainpoolP256r1` stays in lets the model memorise it, and AUC 0.96 is the
+price of that. The twins are dropped, which the percentile test above had
+already done for the same reason.
+
+With both corrected:
+
+| family | model | standard curves | leave-one-out AUC | null AUC (relabelled) | P(null ≥ observed) |
+|---|---|---|---|---|---|
+| SECG vs x962_sim | logistic | 6 | 0.52 | 0.45 ± 0.20 | 0.37 |
+| SECG vs x962_sim | gradient boosting | 6 | 0.45 | 0.44 ± 0.15 | 0.45 |
+| Brainpool vs brainpool_sim | logistic | 4 | 0.62 | 0.42 ± 0.20 | 0.17 |
+| Brainpool vs brainpool_sim | gradient boosting | 4 | 0.34 | 0.30 ± 0.18 | 0.40 |
+
+Nothing separates. The null's standard deviation of 0.15 to 0.20 is the
+honest statement of what four to six positives can support: a model has to
+reach roughly 0.85 before it is outside what random relabelling produces, and
+none comes close. The per-curve out-of-fold percentiles agree with the LOF
+ranks in spirit — scattered across the range, none consistently high.
+
+So: yes, a distinguisher can be used, and it should be, because it hunts for
+exactly the systematic differences a human would miss. What it hunts down
+here is how the pools were built, not how the curves were chosen. Any future
+positive from this tool needs the same question asked first: is the feature
+it found a property of the curve, or of the generator?
+
 ## Bugs found and fixed
+
+**A filter applied after scaling, three times.** `scale_feature` min-max scales
+over whatever rows it is given, so any row dropped afterwards has still set the
+range. That has now gone wrong three separate ways in this work: missing trait
+results imputed to `-1.0` outside the scaled range; the prime-field guard
+excluding Koblitz curves only after they had set the ranges; and `--cofactor`
+doing the same for cofactor-2 and cofactor-4 curves, distorting precisely the
+cofactor-correlated traits it exists to condition out. All three produced
+output that looked entirely reasonable, which is what makes the class
+dangerous. `build_features` now takes every such filter as `standard_curves` or
+`restrict_to` and applies it before the trait loop; nothing should filter the
+frame it returns. The last of the three was reported by Cursor Bugbot.
 
 **Excluded curves still set the feature scale.** The field guard that drops
 curves over a different prime ran *after* `build_features` had min-max scaled
@@ -517,6 +786,8 @@ the analysis, and the second disguises why.
   specific curves fall; they are not a powered hypothesis test, and no single
   curve's percentile should be read as meaningful on its own.
 - `twist_embedding` has still never been executed; see above.
+- The supervised distinguisher has four to six positives per family. Its null
+  spread (±0.2 AUC) means only a gross difference could register.
 - LOF over 100+ correlated, partly discrete features is a blunt instrument.
   The negative result is robust (no standard curve comes near the threshold,
   and the only curve that crosses it is a simulated one); a positive result

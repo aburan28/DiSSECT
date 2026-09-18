@@ -62,11 +62,32 @@ def matching_field_curves(source, category, sim_category, bits):
     return usable, skipped
 
 
-def build_features(source, category, bits, traits=None, sim_category=None, standard_curves=None):
+def _curves_with_cofactor(source, categories, bits, cofactor):
+    """Names of curves in `categories` at `bits` whose cofactor is `cofactor`."""
+    keep = set()
+    for category in categories:
+        query = {"category": [category], "bits": [str(bits)]}
+        if source.startswith("mongodb"):
+            records = dp.database.get_curves(dp.database.connect(source), query)
+        else:
+            url = f"{source}db/curves?category={category}&bits={bits}"
+            with urllib.request.urlopen(url) as handle:
+                records = json.loads(handle.read())["data"]
+        keep.update(r["name"] for r in records if int(r["cofactor"]) == cofactor)
+    return keep
+
+
+def build_features(source, category, bits, traits=None, sim_category=None, standard_curves=None,
+                   restrict_to=None):
     """Join per-trait results for `category` and the simulated pool into one frame.
 
     `standard_curves`, when given, restricts the standard side to those names
     before scaling, so excluded curves cannot set the feature ranges.
+
+    `restrict_to` narrows *both* sides the same way, and for the same reason. Any
+    curve dropped after `scale_feature` has run would still have set that
+    feature's range, which silently defeats the point of excluding it -- so
+    every such filter has to be applied here rather than to the returned frame.
     """
     sim_category = sim_category or f"{category}_sim"
     query = {"category": [category, sim_category], "bits": [str(bits)], "cofactors": "all", "example": None}
@@ -78,6 +99,8 @@ def build_features(source, category, bits, traits=None, sim_category=None, stand
     curves = curves[["curve", "category"]]
     if standard_curves is not None:
         curves = curves[curves.curve.isin(standard_curves) | (curves.category == sim_category)]
+    if restrict_to is not None:
+        curves = curves[curves.curve.isin(restrict_to)]
     for name in traits or sorted(TRAITS):
         try:
             trait_df = dp.get_trait(source, name, query, False)
@@ -149,6 +172,11 @@ def main():
                              "so x962_sim is their counterpart.")
     parser.add_argument("--bits", type=int, nargs="+", default=[256])
     parser.add_argument("--source", default="https://dissect.crocs.fi.muni.cz/")
+    parser.add_argument("--cofactor", type=int, default=None,
+                        help="restrict both sides to curves of this cofactor. The X9.62 pool "
+                             "spans cofactors 1, 2 and 4 while every standard X9.62 curve has "
+                             "cofactor 1, so the unrestricted pool is a broader null than the "
+                             "standard's own practice.")
     parser.add_argument("--max-missing", type=float, default=0.05,
                         help="drop a feature if more than this fraction of simulated curves lack it")
     parser.add_argument("--no-coverage-filter", action="store_true",
@@ -166,8 +194,14 @@ def main():
             if not usable:
                 print("  no standard curves share the simulated pool's field")
                 continue
+        restrict_to = None
+        if args.cofactor is not None:
+            restrict_to = _curves_with_cofactor(args.source, [args.category, sim_category],
+                                                bits, args.cofactor)
+            print(f"  restricted to cofactor {args.cofactor}: {len(restrict_to)} curves")
+
         df = build_features(args.source, args.category, bits, sim_category=sim_category,
-                            standard_curves=usable)
+                            standard_curves=usable, restrict_to=restrict_to)
         if (df.category == args.category).sum() == 0:
             print("  no standard curves at this bitlength")
             continue
