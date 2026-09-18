@@ -594,6 +594,50 @@ cardinality would mean. Chance collisions were never expected over a Hasse
 interval of width 2¹³⁰, but a generation defect would not have been a chance
 event.
 
+### `field_representation`: how a binary field is actually built
+
+`prime_shape` measures how sparse the field size is, but over a binary field
+*q* = 2^*m* is a single bit however the field is built, so it says nothing there.
+The counterpart is the polynomial defining the extension, and it is a real design
+axis no trait covered.
+
+Run over the 64 binary standard records:
+
+| terms | count | meaning |
+|---|---|---|
+| 3 | 29 | trinomial — the fastest reduction |
+| 5 | 31 | pentanomial |
+| 15 | 2 | normal basis |
+| 23 | 2 | normal basis |
+
+Two things fall out that are worth naming.
+
+**Four curves are not using a polynomial basis at all.** The 15- and 23-term
+entries are `c2onb191v4`, `c2onb191v5`, `c2onb239v4` and `c2onb239v5`, whose
+degrees run 191, 190, 188, 184, 176, 160, … — powers of two subtracted from the
+top, the signature of a Gaussian normal basis rather than a reduction polynomial.
+The `onb` in their names is exactly that. A curve represented this way is not
+interchangeable with a polynomial-basis curve of the same field size, and nothing
+else in the trait set distinguishes them.
+
+**Standards disagree on how to build the same field.** At *m* = 163 there are two
+incompatible pentanomials in deployed use:
+
+| polynomial | curves |
+|---|---|
+| *x*¹⁶³ + *x*⁷ + *x*⁶ + *x*³ + 1 | `B-163`, `K-163`, `sect163k1`, `sect163r1`, `sect163r2`, `wtls3`, `ansit163r2`, `ansix9t163k1` |
+| *x*¹⁶³ + *x*⁸ + *x*² + *x* + 1 | `c2pnb163v1`, `c2pnb163v2`, `c2pnb163v3`, `wtls5` |
+
+The same split appears at *m* = 191 and *m* = 239, the latter carrying three
+different representations across standards. Field elements are not portable
+between them, so this is a fragmentation of F₂¹⁶³ into two non-interoperable
+encodings rather than a property of any one curve.
+
+The `reduction_degree` output records the second-highest degree, which governs
+how far a carry out of the top propagates. The 163-bit curves sit at 7, while
+`sect239k1` reaches 158 — a materially slower reduction for a comparable field
+size.
+
 ### The percentiles, tested rather than eyeballed
 
 Under exchangeability — the null that a standard curve is just another curve
