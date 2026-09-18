@@ -723,7 +723,7 @@ With both corrected:
 | SECG vs x962_sim | logistic | 6 | 0.52 | 0.45 ± 0.20 | 0.37 |
 | SECG vs x962_sim | gradient boosting | 6 | 0.45 | 0.44 ± 0.15 | 0.45 |
 | Brainpool vs brainpool_sim | logistic | 4 | 0.62 | 0.42 ± 0.20 | 0.17 |
-| Brainpool vs brainpool_sim | gradient boosting | 4 | 0.34 | — | — |
+| Brainpool vs brainpool_sim | gradient boosting | 4 | 0.34 | 0.30 ± 0.18 | 0.40 |
 
 Nothing separates. The null's standard deviation of 0.15 to 0.20 is the
 honest statement of what four to six positives can support: a model has to
