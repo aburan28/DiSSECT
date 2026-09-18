@@ -59,6 +59,9 @@ dissect-standard_vs_simulated --category brainpool --bits 160 192 224 256
 
 # and the artefact it guards against
 dissect-standard_vs_simulated --category x962 --bits 256 --no-coverage-filter
+
+# a supervised distinguisher, calibrated against relabelled simulated curves
+dissect-ml_distinguisher --category secg --sim-category x962_sim --bits 128 160 192 224 256
 ```
 
 ## The limit worth keeping in view

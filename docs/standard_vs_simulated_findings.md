@@ -674,6 +674,69 @@ result is *no evidence of an anomaly*, not evidence of none, and the ceiling is
 set by having one or two standard curves per bitlength — not by the method, and
 not fixable by adding traits.
 
+## A supervised distinguisher, and the two things it found instead
+
+The natural next question is whether a classifier can *learn* the difference
+between standard and simulated curves, rather than waiting for one to stick
+out under LOF. `dissect-ml_distinguisher` does that: it trains logistic
+regression and gradient-boosted trees to separate the standard curves of a
+family from their pools, scores each standard curve with a model that never
+saw it, and reports the leave-one-out AUC. Because the positive class is six
+curves (SECG) or four (Brainpool `r1`), the AUC alone is uninterpretable, so
+the same procedure runs on a null: random simulated curves are relabelled as
+"standard" and scored the same way, and the observed AUC is compared against
+that distribution.
+
+The first run looked like a result. Gradient boosting on SECG reached AUC 0.69
+and gave secp128r1 and secp224r1 an out-of-fold P(standard) of 1.000;
+logistic regression on Brainpool reached 0.96. Both were artefacts, and both
+are worth recording because a distinguisher is exactly the tool that finds
+them.
+
+**The simulator keeps the smaller root of *b*.** The X9.62 procedure derives
+*b* from the seed only up to sign: it asks for a solution of *b*²·*r* ≡ *a*³
+(mod *p*), and there are two, *b* and *p* − *b*. Every one of the 18,502 to
+36,126 simulated X9.62 curves at each bitlength has *b* < *p*/2 (maximum
+0.5000·*p*), so the simulator canonicalises to the smaller root. The standards
+did not: secp128r1 has *b* = 0.908·*p* and secp224r1 has *b* = 0.703·*p*. After
+min-max scaling those two curves sit at exactly 1.0 on `weierstrass_b`, above
+the whole pool, and a tree splits on it. Since every pool prime is 3 mod 4,
+the two roots are not isomorphic curves but quadratic twists of each other, so
+this is a genuine gap in the simulated space — the pool never contains a curve
+whose *larger* root passed the order test — but not a property of the
+standard curves, which fall on either side as a coin flip would. The
+Brainpool simulator has no such convention (34% of its curves have
+*b* > *p*/2). `weierstrass_b` is dropped from the classifier, and removing it
+from the LOF feature set moves secp128r1 from the 59th to the 12th percentile
+while shifting every other SECG curve by under three points.
+
+**Brainpool `t1` is `r1`.** The two are the same curve up to isomorphism and
+share every trait value. Leaving `brainpoolP256t1` out of training while
+`brainpoolP256r1` stays in lets the model memorise it, and AUC 0.96 is the
+price of that. The twins are dropped, which the percentile test above had
+already done for the same reason.
+
+With both corrected:
+
+| family | model | standard curves | leave-one-out AUC | null AUC (relabelled) | P(null ≥ observed) |
+|---|---|---|---|---|---|
+| SECG vs x962_sim | logistic | 6 | 0.52 | 0.45 ± 0.20 | 0.37 |
+| SECG vs x962_sim | gradient boosting | 6 | 0.45 | 0.44 ± 0.15 | 0.45 |
+| Brainpool vs brainpool_sim | logistic | 4 | 0.62 | 0.42 ± 0.20 | 0.17 |
+| Brainpool vs brainpool_sim | gradient boosting | 4 | 0.34 | — | — |
+
+Nothing separates. The null's standard deviation of 0.15 to 0.20 is the
+honest statement of what four to six positives can support: a model has to
+reach roughly 0.85 before it is outside what random relabelling produces, and
+none comes close. The per-curve out-of-fold percentiles agree with the LOF
+ranks in spirit — scattered across the range, none consistently high.
+
+So: yes, a distinguisher can be used, and it should be, because it hunts for
+exactly the systematic differences a human would miss. What it hunts down
+here is how the pools were built, not how the curves were chosen. Any future
+positive from this tool needs the same question asked first: is the feature
+it found a property of the curve, or of the generator?
+
 ## Bugs found and fixed
 
 **A filter applied after scaling, three times.** `scale_feature` min-max scales
@@ -723,6 +786,8 @@ the analysis, and the second disguises why.
   specific curves fall; they are not a powered hypothesis test, and no single
   curve's percentile should be read as meaningful on its own.
 - `twist_embedding` has still never been executed; see above.
+- The supervised distinguisher has four to six positives per family. Its null
+  spread (±0.2 AUC) means only a gross difference could register.
 - LOF over 100+ correlated, partly discrete features is a blunt instrument.
   The negative result is robust (no standard curve comes near the threshold,
   and the only curve that crosses it is a simulated one); a positive result
