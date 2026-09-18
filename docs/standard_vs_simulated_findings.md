@@ -523,6 +523,33 @@ cofactor filter ran after the features had already been scaled over the
 unfiltered pool, and they are wrong. The 256-bit figure in particular moves by
 seven percentile points once the filter is applied in the right place.
 
+### The simulated pools are one-sided in seed space
+
+The X9.62 simulation increments from the standard seed, and only upward. Every
+simulated seed lies above the standard's:
+
+| pool | standard seed | first simulated seed | seeds below |
+|---|---|---|---|
+| x962_sim 192-bit | `…e12196d5` | `…e121980c` (+311) | 0 of 18,836 |
+| x962_sim 256-bit | `…819f7e90` | `…819f8032` (+418) | 0 of 18,502 |
+
+This is **not** a bias. SHA-1 makes the curve at seed *s* independent of the
+curve at *s* + *k*, which the data bears out: over the 18,502-curve 256-bit pool,
+seed offset correlates with the normalized trace at *r* = −0.004 (*p* = 0.59,
+Spearman *p* = 0.56), and the cofactor mix in the first half of the seed range
+matches the second (χ², *p* = 0.56). An upward-only sample is therefore still
+exchangeable with the standard curve, and every percentile above stands.
+
+It is a limit on what can be *asked*. The provenance concern is not only "is this
+curve unusual" but "how many acceptable curves did the generator pass over before
+stopping at this one" — and the curves before the standard seed are the ones that
+would answer it. They are absent from the pool by construction, so no analysis
+over this database can address search effort. Generating downward from the
+standard seed would close that gap; nothing else here would need to change.
+
+Brainpool cannot be checked this way at all: the database records seeds for the
+simulated Brainpool curves but not for the standard ones.
+
 ### The percentiles, tested rather than eyeballed
 
 Under exchangeability — the null that a standard curve is just another curve
