@@ -32,6 +32,36 @@ def test_r_plus_1_itself_is_not_an_oracle_divisor():
     assert result["divisor"] == 3
 
 
+def test_p521_complete_r_minus_1_is_not_mislabeled_cheon_immune():
+    order = int(
+        "1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        "fa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409",
+        16,
+    )
+    factors = [
+        (2, 3),
+        (7, 1),
+        (11, 1),
+        (1283, 1),
+        (1458105463, 1),
+        (1647781915921980690468599, 1),
+        (
+            int(
+                "3615194794881930010216942559103847593050265703173292383701371712"
+                "350878926821661243755933835426896058418509759880171943"
+            ),
+            1,
+        ),
+    ]
+
+    result = best_oracle_attack(order, factors)
+
+    assert result["divisor"] == 1898873518475180724503002533770555108536
+    assert math.isclose(result["query_bits"], 130.48033951323217)
+    assert math.isclose(result["total_bits"], 195.25983024338393)
+    assert result["total_bits"] < 0.5 * math.log2(order)
+
+
 def test_divisor_enumeration_has_a_resource_bound():
     try:
         divisors_from_factorization([(2, 20)], limit=20)
