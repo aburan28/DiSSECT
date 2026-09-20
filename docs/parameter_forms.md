@@ -12,7 +12,7 @@ at the published parameters directly: the field, the coefficients, the
 generator, the cofactor, the seed.
 
 None of it is a security finding, and one of the most interesting entries is a
-bug in the database rather than anything about a curve. The reason to record it
+bug in the source dataset rather than anything about a curve. The reason to record it
 is narrower and mostly methodological. A feature that encodes a *convention*
 will separate standard from simulated curves perfectly while saying nothing
 about the mathematics, and the
@@ -96,18 +96,59 @@ The fit is close enough that no seed needs another explanation. Recorded because
 it is exactly the shape of finding that looks alarming when tabulated and
 evaporates when the null is written down.
 
-## One real data bug
+## Every seed in the database derives its curve, except one
 
-`FRP256v1`, the ANSSI curve, carries a **1029-byte** value in the field where a
-160-bit seed belongs. It is 8230 bits of near-random data, at 7.82 bits of
-entropy per byte, and it does not contain the curve's own p, a, b or order.
+A seed is not decoration: a verifiably random curve commits to its coefficients
+through *r*·*b*² ≡ *a*³ (mod *p*), where *r* comes from the seed by SHA-1 alone
+(X9.62 A.3.3.1). That check is worth running over the whole corpus, and
+`dissect-parameter_forms` now does.
 
-ANSSI never published a seed or any selection justification for FRP256v1, which
-is a standing criticism of the curve. So this field should be empty. It looks
-like a parsing fault upstream rather than anything about the curve, and it is
-worth reporting against the DiSSECT database. Until it is fixed, any analysis
-that reads seed length across categories will see one curve with a seed fifty
-times longer than every other.
+**26 of the 27 prime-field seeds verify.** The single failure is `FRP256v1`,
+the ANSSI curve.
+
+That number is also the control. A verifier that reproduces P-192, P-224,
+P-256, P-384, secp256r1 and twenty-one others from their published seeds is
+working, so the one curve it rejects is being rejected on the evidence. (The
+step that is easy to get wrong is clearing the leading bit of W0. Omit it and
+*nothing* verifies — which is how the first version of this check failed, and
+why the 26 matter as much as the 1.)
+
+### What `FRP256v1` actually carries
+
+Where a 160-bit seed belongs, the record has **1029 bytes** — 2058 hex
+characters, against 40 for every other curve. Beside its siblings in the same
+record it is fifty times the size of anything else:
+
+| field | length (hex chars) |
+|---|---|
+| cm_disc | 79 |
+| discriminant | 77 |
+| embedding_degree | 77 |
+| j_invariant | 77 |
+| trace_of_frobenius | 39 |
+| **seed** | **2058** |
+
+Length alone would prove nothing, since X9.62 permits any seed of at least 160
+bits. It is the verification that settles it, and truncating the value to its
+first 20, first 32 or last 20 bytes does not verify either. The content is
+high-entropy (7.82 bits per byte), is not DER, and contains none of the curve's
+own *p*, *a*, *b* or order, so it is not another field misfiled into this one.
+
+### Where the fault is, and where it is not
+
+**Not in DiSSECT.** Its importer reads the field verbatim at
+`database_handler.py:69-72`, taking the `characteristics.seed` branch because
+the top-level `seed` is null for this curve, and that parsing is correct.
+
+The value is in **`anssi/curves.json` in the `std-curves` dataset**, which
+DiSSECT imports. The record's own cited source is the
+[JORF notice](https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000024668816),
+which publishes the parameters and no seed — FRP256v1 arriving without a seed
+or any selection justification is a documented criticism of the curve, so an
+absent seed is the expected state. The fix belongs upstream: drop the field.
+
+An earlier version of this page attributed the fault to DiSSECT's parsing. That
+was wrong, and tracing it to the source dataset is what corrected it.
 
 ## Generator conventions split by era, not by mathematics
 
@@ -146,3 +187,7 @@ curve in the database is anomalous (trace 1) or supersingular (trace 0).
 dissect-parameter_forms
 dissect-parameter_forms --categories secg nist x962 --embedding-bound 40
 ```
+
+The seed check is part of the default report: it recomputes X9.62 A.3.3.1 for
+every prime-field curve carrying a seed and reports which ones fail to derive
+their own `b`.

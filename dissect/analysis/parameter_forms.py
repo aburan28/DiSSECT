@@ -18,6 +18,7 @@ mean anything. This script is how they are found.
 
 import argparse
 import collections
+import hashlib
 import json
 import sys
 import urllib.request
@@ -117,6 +118,65 @@ def leading_zero_profile(seed_bits, nominal=X962_SEED_BITS):
         expected = total * (1 - 2.0 ** -(nominal - threshold + 1))
         rows.append({"threshold": threshold, "observed": observed, "expected": expected})
     return rows
+
+
+def x962_seed_r(seed_bytes, field_bits):
+    """The intermediate `r` of ANSI X9.62 A.3.3.1 / SEC 1 3.1.3.1.
+
+    A verifiably random curve commits to its coefficients through
+    r*b^2 = a^3 (mod p), where r is derived from the seed by SHA-1 alone. Any
+    seed of at least 160 bits is legal, so length proves nothing on its own and
+    this is the check that does.
+
+    The step that is easy to miss is clearing the leading bit of W0; without it
+    the derivation fails on every curve, including the ones whose seeds are
+    known good.
+    """
+    blocks = (field_bits - 1) // 160
+    remainder = field_bits - 160 * blocks
+    seed_len = len(seed_bytes) * 8
+    seed_value = int.from_bytes(seed_bytes, "big")
+
+    digest = int.from_bytes(hashlib.sha1(seed_bytes).digest(), "big")
+    w0 = digest & ((1 << remainder) - 1)      # the `remainder` rightmost bits
+    r = w0 & ~(1 << (remainder - 1))          # leading bit of W0 cleared
+    for i in range(1, blocks + 1):
+        nxt = ((seed_value + i) % (1 << seed_len)).to_bytes(seed_len // 8, "big")
+        r = (r << 160) | int.from_bytes(hashlib.sha1(nxt).digest(), "big")
+    return r
+
+
+def verifies_x962_seed(seed_bytes, p, a, b):
+    """Does this seed derive these coefficients? Only meaningful over a prime field."""
+    r = x962_seed_r(seed_bytes, p.bit_length())
+    return (r * b * b - a * a * a) % p == 0
+
+
+def seed_verification(curve):
+    """(verified, note) for a prime-field curve carrying a seed, else None.
+
+    `note` explains a None-ish outcome rather than letting a curve that simply
+    cannot be checked read as a curve that failed.
+    """
+    if curve["field"]["type"] != "Prime":
+        return None
+    seed = seed_of(curve)
+    if seed is None:
+        return None
+    try:
+        p = to_int(curve["field"]["p"])
+        a = to_int(curve["params"]["a"]["raw"])
+        b = to_int(curve["params"]["b"]["raw"])
+    except (KeyError, TypeError, ValueError):
+        return None, "parameters unavailable"
+    length = (seed.bit_length() + 7) // 8
+    # The integer has lost any leading zero bytes, so try the natural lengths.
+    for width in {length, 20, (X962_SEED_BITS + 7) // 8}:
+        if width < length:
+            continue
+        if verifies_x962_seed(seed.to_bytes(width, "big"), p, a, b):
+            return True, f"verified with a {width}-byte seed"
+    return False, "does not derive b from a"
 
 
 def generator_scale(curve):
@@ -222,6 +282,21 @@ def report(curves, embedding_bound=20):
     for name, bits in outsized:
         print(f"  OUTSIZED: {name} carries a {bits}-bit value where a {X962_SEED_BITS}-bit "
               f"seed belongs ({(bits + 7) // 8} bytes)")
+
+    print("\n=== do the seeds actually derive the curves? (X9.62 A.3.3.1) ===")
+    checked = failed = 0
+    for curve in sorted(curves, key=lambda c: c["name"]):
+        result = seed_verification(curve)
+        if result is None:
+            continue
+        verified, note = result
+        checked += 1
+        if not verified:
+            failed += 1
+            print(f"  FAILS: {curve['name']:22s} ({curve['category']}) -- {note}")
+    print(f"  {checked - failed}/{checked} prime-field seeds derive their own coefficients")
+    if failed:
+        print("  a failure means the stored value is not the seed this curve was generated from")
 
     print("\n=== generator x-coordinate ===")
     small = [(c["name"], generator_scale(c)) for c in curves

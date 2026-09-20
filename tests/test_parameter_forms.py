@@ -89,3 +89,60 @@ def test_degenerate_parameters_names_each_shape():
         "embedding degree 12"]
     assert degenerate_parameters({"properties": {"trace": 5, "embedding_degree": 10**9}}) == []
     assert degenerate_parameters({}) == []
+
+
+# secp256r1, whose seed is published and verifiable. Fixed vectors, no network.
+SECP256R1 = {
+    "name": "secp256r1",
+    "category": "secg",
+    "cofactor": 1,
+    "field": {
+        "type": "Prime",
+        "bits": 256,
+        "p": 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF,
+    },
+    "params": {
+        "a": {"raw": 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC},
+        "b": {"raw": 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B},
+    },
+    "simulation": {"seed": 0xC49D360886E704936A6678E1139D26B7819F7E90},
+}
+
+
+def test_x962_derivation_reproduces_a_published_curve():
+    from dissect.analysis.parameter_forms import verifies_x962_seed
+
+    p = SECP256R1["field"]["p"]
+    a = SECP256R1["params"]["a"]["raw"]
+    b = SECP256R1["params"]["b"]["raw"]
+    seed = SECP256R1["simulation"]["seed"].to_bytes(20, "big")
+    assert verifies_x962_seed(seed, p, a, b)
+
+
+def test_a_wrong_seed_does_not_verify():
+    from dissect.analysis.parameter_forms import verifies_x962_seed
+
+    p = SECP256R1["field"]["p"]
+    a = SECP256R1["params"]["a"]["raw"]
+    b = SECP256R1["params"]["b"]["raw"]
+    wrong = (SECP256R1["simulation"]["seed"] ^ 1).to_bytes(20, "big")
+    assert not verifies_x962_seed(wrong, p, a, b)
+
+
+def test_seed_verification_reports_success_on_a_real_curve():
+    from dissect.analysis.parameter_forms import seed_verification
+
+    verified, note = seed_verification(SECP256R1)
+    assert verified is True
+    assert "20-byte" in note
+
+
+def test_seed_verification_skips_what_it_cannot_check():
+    from dissect.analysis.parameter_forms import seed_verification
+
+    # binary field: the derivation is not defined the same way
+    assert seed_verification({"field": {"type": "Binary", "bits": 163},
+                              "simulation": {"seed": 5}}) is None
+    # no seed to check
+    assert seed_verification({"field": {"type": "Prime", "bits": 256, "p": 7},
+                              "simulation": {}}) is None
