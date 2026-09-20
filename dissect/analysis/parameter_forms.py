@@ -284,17 +284,26 @@ def report(curves, embedding_bound=20):
               f"seed belongs ({(bits + 7) // 8} bytes)")
 
     print("\n=== do the seeds actually derive the curves? (X9.62 A.3.3.1) ===")
-    checked = failed = 0
+    passed = failed = unknown = 0
     for curve in sorted(curves, key=lambda c: c["name"]):
         result = seed_verification(curve)
         if result is None:
             continue
         verified, note = result
-        checked += 1
-        if not verified:
+        # Three outcomes, and they must stay apart: a curve whose parameters
+        # cannot be read has not failed its derivation, and saying so would be
+        # the same false accusation this report exists to withdraw.
+        if verified is None:
+            unknown += 1
+            print(f"  could not be checked: {curve['name']:22s} ({curve['category']}) -- {note}")
+        elif verified:
+            passed += 1
+        else:
             failed += 1
             print(f"  FAILS: {curve['name']:22s} ({curve['category']}) -- {note}")
-    print(f"  {checked - failed}/{checked} prime-field seeds derive their own coefficients")
+    print(f"  {passed}/{passed + failed} prime-field seeds derive their own coefficients")
+    if unknown:
+        print(f"  {unknown} further curve(s) could not be checked and are excluded from that count")
     if failed:
         print("  a failure means the stored value is not the seed this curve was generated from")
 
@@ -308,7 +317,11 @@ def report(curves, embedding_bound=20):
     print("\n=== one prime, several standards ===")
     by_prime = collections.defaultdict(list)
     for curve in prime:
-        by_prime[to_int(curve["field"]["p"])].append((curve["category"], curve["name"]))
+        try:
+            value = to_int(curve["field"]["p"])
+        except (KeyError, TypeError, ValueError):
+            continue  # a record we cannot parse should not take down the report
+        by_prime[value].append((curve["category"], curve["name"]))
     for value, entries in sorted(by_prime.items(), key=lambda kv: kv[0].bit_length()):
         categories = sorted({category for category, _ in entries})
         if len(categories) > 1:

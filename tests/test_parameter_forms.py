@@ -146,3 +146,35 @@ def test_seed_verification_skips_what_it_cannot_check():
     # no seed to check
     assert seed_verification({"field": {"type": "Prime", "bits": 256, "p": 7},
                               "simulation": {}}) is None
+
+
+def test_unreadable_parameters_are_not_reported_as_a_failed_derivation():
+    """A curve we cannot check must not be accused of a bad seed."""
+    from dissect.analysis.parameter_forms import seed_verification
+
+    broken = {
+        "name": "unreadable",
+        "field": {"type": "Prime", "bits": 256, "p": "not-a-number"},
+        "params": {"a": {"raw": 1}, "b": {"raw": 2}},
+        "simulation": {"seed": 0xC49D360886E704936A6678E1139D26B7819F7E90},
+    }
+    verified, note = seed_verification(broken)
+    assert verified is None, "unreadable parameters must be 'unknown', not False"
+    assert "unavailable" in note
+
+
+def test_report_separates_unknown_from_failed(capsys):
+    from dissect.analysis.parameter_forms import report
+
+    curves = [
+        SECP256R1,
+        {"name": "unreadable", "category": "x", "cofactor": 1,
+         "field": {"type": "Prime", "bits": 256, "p": "not-a-number"},
+         "params": {"a": {"raw": 1}, "b": {"raw": 2}},
+         "simulation": {"seed": 0xC49D360886E704936A6678E1139D26B7819F7E90}},
+    ]
+    report(curves)
+    out = capsys.readouterr().out
+    assert "1/1 prime-field seeds derive their own coefficients" in out
+    assert "FAILS: unreadable" not in out
+    assert "could not be checked" in out
