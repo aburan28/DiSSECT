@@ -18,6 +18,10 @@ crosses it is a *simulated* one.
 
 [Read the attack-oriented curve-selection review →]({{ '/curve_selection_security_review.html' | relative_url }})
 
+[The supervised distinguisher, defined →]({{ '/ml_distinguisher_methodology.html' | relative_url }})
+
+[The form of the adopted parameters →]({{ '/parameter_forms.html' | relative_url }})
+
 ## What was actually interesting
 
 The outlier result is not a curve-security verdict.  In particular, the
@@ -45,6 +49,16 @@ manufacture structure that is not in the curves:
 The first of these points squarely at the conclusion a motivated reader would
 most like to reach — that the standardised curves are special. It is an artefact.
 
+The same pattern repeated when a **supervised distinguisher** was added: its
+first run separated standard from simulated curves well enough to look like a
+result, and both separators turned out to be conventions of the *simulator* —
+a canonical square root for `b`, and a Brainpool curve duplicated under two
+names. Once excluded, nothing separates. The
+[methodology page]({{ '/ml_distinguisher_methodology.html' | relative_url }})
+defines the null that establishes this, and the
+[parameter-form survey]({{ '/parameter_forms.html' | relative_url }}) enumerates
+the conventions a distinguisher would otherwise latch onto.
+
 ## Reproducing it
 
 Analysis needs no SageMath; computing traits does.
@@ -62,6 +76,9 @@ dissect-standard_vs_simulated --category x962 --bits 256 --no-coverage-filter
 
 # a supervised distinguisher, calibrated against relabelled simulated curves
 dissect-ml_distinguisher --category secg --sim-category x962_sim --bits 128 160 192 224 256
+
+# the form of the published parameters themselves
+dissect-parameter_forms
 ```
 
 ## The limit worth keeping in view

@@ -37,6 +37,7 @@ dissect-feature_clusters = "dissect.analysis.feature_clusters:main"
 dissect-feature_detail = "dissect.analysis.feature_detail:main"
 dissect-standard_vs_simulated = "dissect.analysis.standard_vs_simulated:main"
 dissect-ml_distinguisher = "dissect.analysis.ml_distinguisher:main"
+dissect-parameter_forms = "dissect.analysis.parameter_forms:main"
 
 [tool.setuptools.package-data]
 "dissect.utils.kohel.mod" = ["*.dbz"]

@@ -737,6 +737,13 @@ here is how the pools were built, not how the curves were chosen. Any future
 positive from this tool needs the same question asked first: is the feature
 it found a property of the curve, or of the generator?
 
+The method, the relabelled null it is measured against, and the conditions
+under which a positive would mean anything are set out in full on the
+[methodology page](ml_distinguisher_methodology.html). The conventions a
+distinguisher would otherwise latch onto are enumerated in the
+[parameter-form survey](parameter_forms.html), which also records the one
+outright data bug found in the database.
+
 ## Bugs found and fixed
 
 **A filter applied after scaling, three times.** `scale_feature` min-max scales
