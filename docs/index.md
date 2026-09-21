@@ -22,6 +22,8 @@ crosses it is a *simulated* one.
 
 [The form of the adopted parameters →]({{ '/parameter_forms.html' | relative_url }})
 
+[How much search went into a standard curve →]({{ '/search_effort.html' | relative_url }})
+
 ## What was actually interesting
 
 The outlier result is not a curve-security verdict.  In particular, the
@@ -79,6 +81,9 @@ dissect-ml_distinguisher --category secg --sim-category x962_sim --bits 128 160 
 
 # the form of the published parameters themselves
 dissect-parameter_forms
+
+# how much search the published criteria actually cost
+dissect-search_effort --bits 192 224 256
 ```
 
 ## The limit worth keeping in view
