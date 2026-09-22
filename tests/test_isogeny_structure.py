@@ -107,3 +107,35 @@ def test_rho_security_is_half_the_largest_prime_factor():
     assert rho_security_bits([(2, 3), (7, 1), (2 ** 127 - 1, 1)]) == 63
     assert rho_security_bits([(3, 1)]) == 1
     assert rho_security_bits([]) is None
+
+
+def test_kronecker_at_two_is_not_a_legendre_symbol():
+    from dissect.analysis.isogeny_structure import kronecker_at_two
+
+    assert kronecker_at_two(4) == 0      # even
+    assert kronecker_at_two(-4) == 0
+    assert kronecker_at_two(1) == 1      # 1 mod 8
+    assert kronecker_at_two(-1) == 1     # 7 mod 8
+    assert kronecker_at_two(5) == -1     # 5 mod 8
+    assert kronecker_at_two(3) == -1     # 3 mod 8
+
+
+def test_l_value_includes_the_euler_factor_at_two():
+    """The omission was not a harmless constant: the pool is ~44% odd-trace
+    (D = 5 mod 8, factor 2/3) and ~56% even-trace (D even, factor 1), so
+    dropping it scaled one part of the pool against the other."""
+    from dissect.analysis.isogeny_structure import kronecker_at_two, log_l_value
+
+    D_odd = frobenius_discriminant(P256_P, P256_TRACE)
+    assert D_odd % 8 == 5 and kronecker_at_two(D_odd) == -1
+    # an even trace gives even D, where the factor at 2 is absent entirely
+    D_even = frobenius_discriminant(P256_P, P256_TRACE + 1)
+    assert D_even % 2 == 0 and kronecker_at_two(D_even) == 0
+
+    # with only one odd prime in range the value is the 2-factor times that one
+    only3_odd = log_l_value(D_odd, 3)
+    expected = -math.log(1 - (-1) / 2) - math.log(1 - legendre(D_odd, 3) / 3)
+    assert only3_odd == pytest.approx(expected)
+
+    only3_even = log_l_value(D_even, 3)
+    assert only3_even == pytest.approx(-math.log(1 - legendre(D_even, 3) / 3))

@@ -100,16 +100,33 @@ def conductor_small_part(D, primes=None):
     return found
 
 
+def kronecker_at_two(D):
+    """chi_D(2), which is NOT a Legendre symbol and not computable by pow().
+
+    0 when D is even, +1 when D = +/-1 mod 8, -1 when D = +/-3 mod 8.
+
+    Omitting this factor is not harmless even though every prime-order curve has
+    D = 5 mod 8. The simulated pools are roughly 44% prime-order and 56% even
+    trace, so dropping it scales one part of the pool by 3/2 relative to the
+    other and the percentiles compare two different functions.
+    """
+    if D % 2 == 0:
+        return 0
+    return 1 if D % 8 in (1, 7) else -1
+
+
 def log_l_value(D, bound=20000):
-    """log of the truncated Euler product for L(1, chi_D).
+    """log of the truncated Euler product for L(1, chi_D), including the prime 2.
 
     Proxy for class number relative to sqrt|D|, i.e. for the size of the
     horizontal isogeny class. Truncated, so only meaningful as a comparison
     between curves evaluated at the same bound.
     """
     total = 0.0
-    sieve = _primes_upto(bound)
-    for l in sieve:
+    chi2 = kronecker_at_two(D)
+    if chi2:
+        total -= math.log(1.0 - chi2 / 2)
+    for l in _primes_upto(bound):
         r = D % l
         if r == 0:
             continue
@@ -119,6 +136,7 @@ def log_l_value(D, bound=20000):
 
 
 def _primes_upto(n):
+    """Odd primes only; the factor at 2 is handled by kronecker_at_two."""
     flags = bytearray([1]) * (n + 1)
     flags[0] = flags[1] = 0
     for i in range(2, int(n ** 0.5) + 1):

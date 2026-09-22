@@ -54,22 +54,47 @@ directly, without computing a class number at all.
 
 | curve | L(1,chi) | pool mean | percentile |
 |---|---|---|---|
-| P-192 | 0.617 | 0.676 | 41 |
-| P-224 | 0.539 | 0.884 | 6.8 |
-| P-256 | 1.084 | 0.901 | 76 |
+| P-192 | 0.412 | 0.573 | 19.9 |
+| P-224 | 0.359 | 0.762 | **2.6** |
+| P-256 | 0.723 | 0.768 | 50.9 |
 
-P-224's isogeny class is somewhat smaller than typical. Nothing here is
-anomalous.
+P-224's horizontal isogeny class is the smallest of the three relative to its
+pool. At one curve in three sitting near the 2.6th percentile, across a handful
+of statistics, this is the most extreme value in the whole analysis and still
+not significant. It is worth recording and not worth concluding from.
 
-**A statistic that overstated it, recorded because the correction is the
-point.** Counting how many primes under 50 split put P-224 at the 0.2nd
-percentile, and it held there across four different prime ranges, which looked
-robust. The L-value is the quantity the class number actually depends on, and
-it moves P-224 to the 6.8th percentile. A crude count over a handful of tiny
-primes was not measuring what it appeared to measure.
+**Two corrections sit behind that table, and both moved it.**
 
-The proxy is truncated at a bound the caller sets, so comparisons are only
-valid between curves evaluated at the same bound.
+*The Euler factor at 2 was missing.* `chi_D(2)` is not a Legendre symbol and
+cannot be computed by the same power test, so an initial version simply skipped
+it. That looked harmless because every prime-order curve has `D = 5 mod 8`. It
+was not harmless: the simulated pool is about 44% prime-order and 56% even
+trace, and the factor is 2/3 for the former and absent for the latter. Dropping
+it scaled 44% of the pool against the other 56%, and the NIST curves sit in the
+inflated part. Every percentile fell once it was restored:
+
+| curve | before the fix | after |
+|---|---|---|
+| P-192 | 41 | 19.9 |
+| P-224 | 6.8 | 2.6 |
+| P-256 | 76 | 50.9 |
+
+Cursor Bugbot caught this on review.
+
+*A statistic that overstated a result.* Counting how many primes under 50 split
+put P-224 at the 0.2nd percentile and held there across four prime ranges,
+which looked robust. The L-value is what the class number actually depends on.
+A crude count over a handful of tiny primes was not measuring what it appeared
+to measure.
+
+**Two limits on the proxy.** It is truncated at a bound the caller sets, so
+comparisons are only valid between curves evaluated at the same bound. And it
+uses `D` rather than the fundamental discriminant `d_K`, which is exact
+whenever the conductor is 1. P-224 is the one NIST prime curve where those
+differ, so it was checked directly: `L(chi_D)` and `L(chi_dK)` agree to four
+decimal places, because 3 ramifies in `d_K` as well and both characters vanish
+there. The two could differ for a curve whose conductor carries a prime that
+does not divide `d_K`.
 
 ## Twist structure
 
