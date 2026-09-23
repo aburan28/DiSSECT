@@ -40,6 +40,7 @@ dissect-ml_distinguisher = "dissect.analysis.ml_distinguisher:main"
 dissect-parameter_forms = "dissect.analysis.parameter_forms:main"
 dissect-search_effort = "dissect.analysis.search_effort:main"
 dissect-isogeny_structure = "dissect.analysis.isogeny_structure:main"
+dissect-provenance_checks = "dissect.analysis.provenance_checks:main"
 
 [tool.setuptools.package-data]
 "dissect.utils.kohel.mod" = ["*.dbz"]
