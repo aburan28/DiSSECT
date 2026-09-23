@@ -24,6 +24,10 @@ crosses it is a *simulated* one.
 
 [How much search went into a standard curve →]({{ '/search_effort.html' | relative_url }})
 
+[Isogeny structure of the NIST prime curves →]({{ '/isogeny_structure.html' | relative_url }})
+
+[Provenance checks: twist MOV, seed independence, trace sign →]({{ '/provenance_checks.html' | relative_url }})
+
 ## What was actually interesting
 
 The outlier result is not a curve-security verdict.  In particular, the
@@ -84,6 +88,12 @@ dissect-parameter_forms
 
 # how much search the published criteria actually cost
 dissect-search_effort --bits 192 224 256
+
+# isogeny structure, including quantities the database cannot supply
+dissect-isogeny_structure --bits 192 224 256
+
+# twist embedding degree, seed independence, trace sign
+dissect-provenance_checks
 ```
 
 ## The limit worth keeping in view
