@@ -36,7 +36,14 @@ class ModuliInvariantsTrait(DetailedTrait):
 
         check_budget(curve, params)
         p, g = int(curve.field().characteristic()), curve.genus()
-        if curve.model_type() == "CyclicTrigonal":
+        if curve.model_type() == "CanonicalGenus4":
+            from dissect.utils.canonical_genus4 import quadric_matrix
+
+            Q, C = curve.canonical_polynomials()
+            names, weights, values = ["quadric_determinant"], [4], [quadric_matrix(Q).det()]
+            system, normalization = "Canonical quadric subset", "Determinant of the symmetric quadric matrix; rank and square class are in genus4_canonical_quadric"
+            complete = 0
+        elif curve.model_type() == "CyclicTrigonal":
             polynomial = curve.cover_polynomial()
             degree = int(polynomial.degree())
             branch_degree = degree+int(degree % 3 != 0)
@@ -97,7 +104,9 @@ class ModuliInvariantsTrait(DetailedTrait):
             "names": names, "weights": weights, "values": [field_value(v) for v in values],
             "invariant_count": len(values), "vanishing_count": sum(not v for v in values),
             "nonzero_chart_index": pivot, "absolute_ratios": ratios,
-            "classification_scope": "Unordered branch divisor of this trigonal cover, not a complete curve invariant system" if curve.model_type() == "CyclicTrigonal" else "Geometric weighted invariants; absolute ratios alone are not a complete isomorphism test and do not classify twists",
+            "classification_scope": ("Unordered branch divisor of this trigonal cover, not a complete curve invariant system" if curve.model_type() == "CyclicTrigonal"
+                                     else "Canonical quadric only, not a complete curve invariant system" if curve.model_type() == "CanonicalGenus4"
+                                     else "Geometric weighted invariants; absolute ratios alone are not a complete isomorphism test and do not classify twists"),
             "complete_classical_system": complete,
             "classification_complete_in_stated_scope": complete,
             "status": "ok" if complete else "partial",

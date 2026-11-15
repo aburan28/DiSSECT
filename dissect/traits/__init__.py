@@ -43,6 +43,12 @@ from .automorphism_structure import AutomorphismStructureTrait
 from .moduli_invariants import ModuliInvariantsTrait
 from .gonality_and_quotients import GonalityAndQuotientsTrait
 from .cover_ramification import CoverRamificationTrait
+from .genus2_rosenhain import Genus2RosenhainTrait
+from .genus2_elliptic_quotients import Genus2EllipticQuotientsTrait
+from .genus3_bitangents import Genus3BitangentsTrait
+from .genus3_flexes import Genus3FlexesTrait
+from .genus4_canonical_quadric import Genus4CanonicalQuadricTrait
+from .genus4_tritangents import Genus4TritangentsTrait
 
 TRAITS = dict(
     map(
@@ -92,6 +98,12 @@ TRAITS = dict(
             ModuliInvariantsTrait,
             GonalityAndQuotientsTrait,
             CoverRamificationTrait,
+            Genus2RosenhainTrait,
+            Genus2EllipticQuotientsTrait,
+            Genus3BitangentsTrait,
+            Genus3FlexesTrait,
+            Genus4CanonicalQuadricTrait,
+            Genus4TritangentsTrait,
         ],
     )
 )

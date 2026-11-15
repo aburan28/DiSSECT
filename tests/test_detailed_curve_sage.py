@@ -448,7 +448,9 @@ def test_nonplane_genus_four_trigonal_cover_has_exact_arithmetic_and_gonality():
     assert cover["galois"] == 1
     assert cover["rational_curve_points_from_fibers"] == report["traits"]["frobenius_polynomial"]["curve_cardinality"]
     assert report["traits"]["automorphism_structure"]["cover_stabilizer_complete"] == 1
-    assert report["traits"]["automorphism_structure"]["search_complete"] == 0
+    # The genus-four canonical-quadric trait now proves that this is a cone,
+    # so its unique ruling pencil makes the cover stabilizer the full group.
+    assert report["traits"]["automorphism_structure"]["search_complete"] == 1
 
 
 def test_high_genus_trigonal_pencil_uniqueness_certifies_full_automorphism_search():

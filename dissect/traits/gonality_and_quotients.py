@@ -24,6 +24,7 @@ class GonalityAndQuotientsTrait(DetailedTrait):
         check_budget(curve, params)
         L = function_field(curve)
         upper = int(L.degree())
+        lower = None
         if curve.is_hyperelliptic():
             gonality, rational = 2, None
             certificate = {"theorem": "Unique hyperelliptic double cover", "equation": str(L.polynomial())}
@@ -31,6 +32,16 @@ class GonalityAndQuotientsTrait(DetailedTrait):
             gonality, rational = 3, None
             certificate = {"theorem": "A degree-three cover in genus >= 3 cannot be hyperelliptic by Castelnuovo-Severi",
                            "equation": str(L.polynomial())}
+        elif curve.model_type() == "CanonicalGenus4":
+            from dissect.utils.canonical_genus4 import quadric_profile
+
+            quadric = quadric_profile(curve, params)
+            gonality, rational = 3, None
+            lower = 3 if quadric["base_field_trigonal_pencils"] else 4
+            if quadric["base_field_trigonal_pencils"]:
+                upper = 3
+            certificate = {"theorem": "Canonical genus-four trigonal pencils are the quadric rulings",
+                           "quadric_type": quadric["quadric_type"], "pencils": quadric.get("pencils")}
         else:
             degree = int(curve.plane_polynomial().degree())
             gonality = degree-1
@@ -49,8 +60,8 @@ class GonalityAndQuotientsTrait(DetailedTrait):
             raise ValueError("A supplied map contradicts the proved geometric gonality")
         return {
             "geometric_gonality": gonality,
-            "base_field_gonality": gonality if upper == gonality else None,
-            "base_field_lower_bound": gonality, "base_field_upper_bound": upper,
+            "base_field_gonality": upper if upper == (lower or gonality) else None,
+            "base_field_lower_bound": lower or gonality, "base_field_upper_bound": upper,
             "gonality_certificate": certificate, "rational_point_found": rational,
             "declared_maps": maps,
             "verified_elliptic_quotients": sum(m["status"] == "ok" and m.get("target_genus") == 1 and m.get("separable") for m in maps),

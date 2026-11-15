@@ -30,6 +30,8 @@ class AutomorphismStructureTrait(DetailedTrait):
         "tame_cyclic_quotient_genera": (list, "Invariant-differential dimensions only for groups prime to p"),
         "geometric_automorphism_order": (int, "Null: a finite extension search does not certify the algebraic-closure group"),
         "hyperelliptic_quotient_genus": (int, "Genus zero for the deck involution, including wild double covers"),
+        "pencil_permutations_seen": (list, "Pencil permutations in a computed canonical genus-four subgroup"),
+        "pencil_exchange_witness": (list, "Verified canonical projectivity exchanging two trigonal pencils"),
     })
 
     def compute(self, curve, params):
@@ -37,7 +39,11 @@ class AutomorphismStructureTrait(DetailedTrait):
         if int(curve.q())**params["extension_degree"] > params["max_field_size"]:
             raise AnalysisUnavailable("Search extension exceeds max_field_size", "resource_limit")
         field, embedding = extension_field(curve.field(), params["extension_degree"])
-        if curve.model_type() == "CyclicTrigonal":
+        if curve.model_type() == "CanonicalGenus4":
+            from dissect.utils.canonical_genus4 import canonical_automorphisms
+
+            operation = canonical_automorphisms
+        elif curve.model_type() == "CyclicTrigonal":
             operation = trigonal_automorphisms
         elif curve.is_hyperelliptic():
             operation = hyperelliptic_even if field.characteristic() == 2 else hyperelliptic_odd

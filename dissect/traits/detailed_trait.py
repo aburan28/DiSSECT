@@ -6,6 +6,8 @@ from dissect.utils.curve_analysis import AnalysisUnavailable
 
 class DetailedTrait(Trait):
     SUPPORTED_CURVE_TYPES = ("hyperelliptic", "non_hyperelliptic")
+    GENUS = None
+    MODEL_TYPES = None
     INPUT = {
         "timeout": (int, "Wall-clock limit in seconds"),
         "max_field_size": (int, "Maximum base-field cardinality"),
@@ -30,6 +32,10 @@ class DetailedTrait(Trait):
         family = getattr(curve, "curve_type", lambda: "elliptic")()
         if family not in self.SUPPORTED_CURVE_TYPES:
             return dict(result, status="not_applicable", reason="Requires a supported higher-genus model")
+        if self.GENUS is not None and curve.genus() != self.GENUS:
+            return dict(result, status="not_applicable", reason="Requires genus %d" % self.GENUS)
+        if self.MODEL_TYPES is not None and curve.model_type() not in self.MODEL_TYPES:
+            return dict(result, status="not_applicable", reason="Requires one of these models: " + ", ".join(self.MODEL_TYPES))
         from cysignals.alarm import alarm, cancel_alarm, AlarmInterrupt
 
         try:

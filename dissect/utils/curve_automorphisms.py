@@ -315,9 +315,14 @@ def trigonal_automorphisms(curve, field, embedding, params):
                                             "y_multiplier": str(root), "differential_action": field_matrix(action)})
     result = group_summary(matrices, field, curve.genus())
     # Two distinct degree-three pencils would bound the genus by (3-1)^2=4.
-    full = complete_cover and curve.genus() > 4
+    unique_pencil = curve.genus() > 4
+    if curve.genus() == 4 and field.characteristic() != 2:
+        from dissect.utils.canonical_genus4 import canonical_data, quadric_matrix
+
+        unique_pencil = quadric_matrix(canonical_data(curve)["quadric"]).rank() == 3
+    full = complete_cover and unique_pencil
     return dict(result, search_complete=int(full), cover_stabilizer_complete=int(complete_cover),
                 base_field_order=len(matrices) if full else None,
                 reduced_automorphism_order=None, branch_stabilizer_order=None,
                 transformations=transformations,
-                reason=None if full else "The reported group stabilizes the chosen trigonal pencil; full pencil uniqueness is certified only in genus > 4")
+                reason=None if full else "The reported group stabilizes the chosen trigonal pencil; pencil uniqueness is not certified for this model")

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://gitlab.fi.muni.cz/x408178/curve_analyzer/-/blob/master/LICENSE)
 [![language](https://badgen.net/badge/language/python,sage/purple?list=/)](https://www.sagemath.org/)
-[![traits](https://badgen.net/badge/traits/44/blue)](https://github.com/aburan28/DiSSECT/tree/master/dissect/traits)
+[![traits](https://badgen.net/badge/traits/50/blue)](https://github.com/aburan28/DiSSECT/tree/master/dissect/traits)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crocs-muni/DiSSECT/blob/master/dissect/analysis/playground.ipynb#offline=1)
 
 DiSSECT is, to the best of our knowledge, the largest publicly available database of standardized elliptic curves (taken from our [sister project](https://neuromancer.sk/std/)) and offers generation of simulated curves according to the mentioned standards. The tool contains over 20 tests (which we call traits), each computing curve properties, ranging from classical algebraic ones to unconventional ones and those connected to implementations. After obtaining their empirical distributions, the traits allow us to compare the simulated curves to the standard ones. Finally, DiSSECT provides an easy-to-use interface for implementations of custom traits and their interactive visualization via Jupyter notebook.
@@ -87,7 +87,7 @@ By default, the command uses all available curves. You can filter them using opt
 ### Higher-genus curves
 
 This fork also accepts hyperelliptic equations, smooth projective plane curves,
-and cyclic trigonal covers, including non-plane genus-four examples.
+cyclic trigonal covers, and canonical quadric-cubic intersections in genus four.
 The `canonical_geometry` trait compares their genus, differential
 space, Jacobian dimension and canonical map with elliptic curves.
 `hyperelliptic_branch` measures the branch divisor and its Frobenius orbits
@@ -113,6 +113,19 @@ See [the higher-genus guide](docs/higher_genus_traits.md) for the model schema,
 mathematical conventions, limitations and SageMath tests.
 The [detailed arithmetic and covers reference](docs/detailed_cover_traits.md)
 specifies every computation, map schema, completeness flag and resource bound.
+
+Six [genus-specific traits](docs/genus_specific_traits.md) add Rosenhain
+configurations and systematic degree-two elliptic-quotient discovery in genus
+two, bitangents and explicit flex configurations in genus three, and canonical
+quadric/pencil descent and tritangent configurations in genus four. Contact
+divisors, Frobenius permutations, syzygetic conics and pencil-exchange witnesses
+are returned as exact structured data.
+
+```shell
+dissect-higher-genus-report -i examples/genus_specific_curves.json -o genera-report.json
+dissect-compute-json -t genus3_bitangents -i examples/higher_genus_curves.json --params '{"extension_degree":2,"timeout":120}'
+dissect-compute-json -t genus4_tritangents -i examples/genus4_tritangent_curve.json --params '{"extension_degree":2,"max_incidence_tests":10,"timeout":120}'
+```
 
 ## Performing the analysis
 

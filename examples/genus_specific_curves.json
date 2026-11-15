@@ -1,0 +1,365 @@
+{
+  "curves": [
+    {
+      "name": "genus2-rosenhain-and-elliptic-quotients",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          0,
+          -1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "h": [
+          0
+        ]
+      }
+    },
+    {
+      "name": "genus3-bitangents-and-flexes",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "SmoothPlane",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "polynomial": [
+          {
+            "coeff": 1,
+            "powers": [
+              4,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              4,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              0,
+              4
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "genus3-nonclassical-flexes",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "SmoothPlane",
+      "field": {
+        "type": "Prime",
+        "p": "0x3",
+        "bits": 2
+      },
+      "params": {
+        "polynomial": [
+          {
+            "coeff": 1,
+            "powers": [
+              4,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              4,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              0,
+              4
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "genus4-cone-tritangents",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "CyclicTrigonal",
+      "field": {
+        "type": "Prime",
+        "p": "0x5",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          0,
+          -1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "genus4-split-quadric-and-degenerate-conic-contact",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "CanonicalGenus4",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "quadric": [
+          {
+            "coeff": 1,
+            "powers": [
+              1,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "coeff": -1,
+            "powers": [
+              0,
+              1,
+              1,
+              0
+            ]
+          }
+        ],
+        "cubic": [
+          {
+            "coeff": 1,
+            "powers": [
+              2,
+              1,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": -2,
+            "powers": [
+              1,
+              2,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              3,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              2,
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              1,
+              1,
+              1,
+              0
+            ]
+          },
+          {
+            "coeff": -2,
+            "powers": [
+              1,
+              0,
+              2,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              0,
+              3,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              2,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              2,
+              0,
+              1
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              0,
+              2,
+              1
+            ]
+          },
+          {
+            "coeff": 2,
+            "powers": [
+              0,
+              0,
+              0,
+              3
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "genus4-nonsplit-quadric",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "CanonicalGenus4",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "quadric": [
+          {
+            "coeff": 1,
+            "powers": [
+              1,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "coeff": -1,
+            "powers": [
+              0,
+              2,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": -1,
+            "powers": [
+              0,
+              0,
+              2,
+              0
+            ]
+          }
+        ],
+        "cubic": [
+          {
+            "coeff": 1,
+            "powers": [
+              3,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              3,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 2,
+            "powers": [
+              0,
+              0,
+              3,
+              0
+            ]
+          },
+          {
+            "coeff": 3,
+            "powers": [
+              0,
+              0,
+              0,
+              3
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              1,
+              1,
+              1,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

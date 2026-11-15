@@ -32,6 +32,8 @@ crosses it is a *simulated* one.
 
 [Detailed arithmetic, invariants, automorphisms and ramification of covers →]({{ '/detailed_cover_traits.html' | relative_url }})
 
+[Genus 2, 3 and 4: Rosenhain, quotient maps, bitangents, flexes and tritangents →]({{ '/genus_specific_traits.html' | relative_url }})
+
 ## What was actually interesting
 
 The outlier result is not a curve-security verdict.  In particular, the

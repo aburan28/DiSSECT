@@ -70,6 +70,22 @@ class HigherGenusCurve:
             self._cover_polynomial = f
             self._genus = int(L.genus())
             self._curve_type = "non_hyperelliptic"
+        elif self._form == "CanonicalGenus4":
+            from dissect.utils.canonical_genus4 import homogeneous_form, quadric_matrix
+
+            if self._field.characteristic() == 2:
+                raise ValueError("CanonicalGenus4 currently requires odd characteristic")
+            ring = PolynomialRing(self._field, names=("X0", "X1", "X2", "X3"))
+            Q = homogeneous_form(ring, params["quadric"], 2)
+            C = homogeneous_form(ring, params["cubic"], 3)
+            if quadric_matrix(Q).rank() not in (3, 4):
+                raise ValueError("CanonicalGenus4 requires a quadric of rank three or four")
+            self._curve = Curve([Q, C], ProjectiveSpace(self._field, 3, names=ring.variable_names()))
+            if self._curve.dimension() != 1 or not self._curve.is_smooth():
+                raise ValueError("CanonicalGenus4 requires a geometrically smooth quadric-cubic intersection")
+            self._canonical_polynomials = Q, C
+            self._genus = 4
+            self._curve_type = "non_hyperelliptic"
         elif self._form == "SmoothPlane":
             ring = PolynomialRing(self._field, names=("x", "y", "z"))
             polynomial = ring.zero()
@@ -167,3 +183,6 @@ class HigherGenusCurve:
 
     def cover_polynomial(self):
         return self._cover_polynomial
+
+    def canonical_polynomials(self):
+        return self._canonical_polynomials

@@ -14,6 +14,8 @@ REPORT_TRAITS = (
     "canonical_geometry", "hyperelliptic_branch", "frobenius_polynomial",
     "jacobian_decomposition", "hasse_witt", "newton_polygon", "weierstrass_gaps",
     "automorphism_structure", "moduli_invariants", "gonality_and_quotients", "cover_ramification",
+    "genus2_rosenhain", "genus2_elliptic_quotients", "genus3_bitangents", "genus3_flexes",
+    "genus4_canonical_quadric", "genus4_tritangents",
 )
 
 
