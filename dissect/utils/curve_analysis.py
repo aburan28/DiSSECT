@@ -30,6 +30,10 @@ def function_field(curve):
     def build():
         if curve.model_type() == "CyclicTrigonal":
             return curve.cover_function_field()
+        if curve.model_type() == "CanonicalGenus4":
+            from dissect.utils.canonical_genus4 import canonical_function_field
+
+            return canonical_function_field(curve)[0]
         if curve.is_hyperelliptic():
             from sage.all import FunctionField, PolynomialRing
 

@@ -41,7 +41,9 @@ class GonalityAndQuotientsTrait(DetailedTrait):
             if quadric["base_field_trigonal_pencils"]:
                 upper = 3
             certificate = {"theorem": "Canonical genus-four trigonal pencils are the quadric rulings",
-                           "quadric_type": quadric["quadric_type"], "pencils": quadric.get("pencils")}
+                           "quadric_type": quadric["quadric_type"], "pencils": quadric.get("pencils"),
+                           "projection_function": str(L.base_field().gen()),
+                           "projection_equation": str(L.polynomial()), "projection_degree": int(L.degree())}
         else:
             degree = int(curve.plane_polynomial().degree())
             gonality = degree-1

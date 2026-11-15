@@ -42,8 +42,7 @@ def canonical_data(curve):
             raise AnalysisUnavailable("Requires a non-hyperelliptic curve of genus four", "not_applicable")
         if curve.model_type() == "CanonicalGenus4":
             Q, C = curve.canonical_polynomials()
-            L = function_field(curve)
-            coordinates = list(curve.curve().coordinate_functions())
+            _, coordinates = canonical_function_field(curve)
             return {"quadric": Q, "cubic": C, "coordinates": coordinates,
                     "basis": [str(v) for v in coordinates], "origin": "validated canonical input"}
         L = function_field(curve)
@@ -150,6 +149,84 @@ def ruling_transform(Q):
     if not M.det():
         raise ValueError("Ruling coordinate transform is singular")
     return M
+
+
+def canonical_function_field(curve):
+    """A small-degree field model with explicit original canonical coordinates.
+
+    Parameterizing Q first avoids the generic space-curve normalization. On a
+    nonsplit quadric, projection from a rational tangent line gives degree four;
+    a bounded search for its point falls back to a degree-at-most-six model.
+    """
+    def compute():
+        from sage.all import FunctionField, PolynomialRing, matrix, vector, identity_matrix
+
+        Q, C = curve.canonical_polynomials()
+        field, A = curve.field(), quadric_matrix(Q)
+        rank = int(A.rank())
+        K = FunctionField(field, "x")
+        ring = PolynomialRing(K, "y")
+        x, y = ring(K.gen()), ring.gen()
+        if rank == 3 or A.det().is_square():
+            change = ruling_transform(Q)
+            standard = [ring.one(), x, x*x, y] if rank == 3 else [ring.one(), x, y, x*y]
+        else:
+            basis = list(identity_matrix(field, 4).rows())
+
+            def hyperbolic_frame(point):
+                partner = next(v for v in basis if point*A*v)
+                partner -= (partner*A*partner)/(2*(point*A*partner))*point
+                partner /= 2*(point*A*partner)
+                complement = matrix(field, [list(point*A), list(partner*A)]).right_kernel().basis()
+                return partner, list(complement), point
+
+            def affine_model(partner, complement, point):
+                change = matrix(field, [partner]+complement+[point]).transpose()
+                direction = vector(ring, complement[0])*x+vector(ring, complement[1])*y
+                last = -sum(A[i,j]*direction[i]*direction[j] for i in range(4) for j in range(4))
+                standard = [ring.one(), x, y, last]
+                images = [sum(change[i,j]*standard[j] for j in range(4)) for i in range(4)]
+                return change, standard, images
+
+            point = isotropic_vector(A)
+            partner, complement, point = hyperbolic_frame(point)
+            change, standard, images = affine_model(partner, complement, point)
+            # First look on Q \cap C, using at most 32 degree-six root searches.
+            if C(*point):
+                point = None
+                polynomial = substitute(C, images, ring)
+                constant_ring = PolynomialRing(field, "t")
+                evaluate_x = lambda coefficient, value: coefficient.numerator()(value)/coefficient.denominator()(value)
+                for index, value in enumerate(field):
+                    if index == 32:
+                        break
+                    section = constant_ring([evaluate_x(coefficient, value) for coefficient in polynomial])
+                    roots = section.roots(multiplicities=False)
+                    if roots:
+                        point = vector(field, [evaluate_x(image(roots[0]), value) for image in images])
+                        break
+            if point is not None:
+                partner, complement, point = hyperbolic_frame(point)
+                gradient = vector(field, [C.derivative(variable)(*point) for variable in C.parent().gens()])
+                a, b = [gradient*v for v in complement]
+                if not (a or b):
+                    raise ValueError("A smooth canonical curve must have an independent cubic gradient")
+                tangent = b*complement[0]-a*complement[1]
+                transverse = next(v for v in complement if matrix(field, [v, tangent]).rank() == 2)
+                change, standard, images = affine_model(partner, [transverse, tangent], point)
+                if substitute(C, images, ring).degree() > 4:
+                    raise ValueError("Projection from the canonical tangent line must have degree at most four")
+        images = [sum(change[i,j]*standard[j] for j in range(4)) for i in range(4)]
+        equation = substitute(C, images, ring)
+        if substitute(Q, images, ring) or not equation or equation.degree() < 2:
+            raise ValueError("The canonical quadric parameterization did not give a curve equation")
+        L = K.extension(equation, "y")
+        coordinates = [sum(L(coefficient)*L.gen()**i for i, coefficient in enumerate(image)) for image in images]
+        if any(sum(L(c)*prod(v**e for v,e in zip(coordinates,p)) for p,c in polynomial.dict().items()) for polynomial in (Q,C)):
+            raise ValueError("The function-field coordinates failed their canonical equations")
+        return L, coordinates
+
+    return cached(curve, "canonical_field_model", compute)
 
 
 def quadric_profile(curve, params):

@@ -3,6 +3,7 @@ import json
 import subprocess
 import sys
 from itertools import product
+from math import prod
 from pathlib import Path
 
 import pytest
@@ -396,6 +397,30 @@ def test_canonical_input_works_with_shared_arithmetic(split_curve):
     assert result["curve_cardinality"] == len(split_curve.curve().rational_points()) == 6
     assert function_field(split_curve).genus() == 4
     assert_ok(TRAITS["hasse_witt"](split_curve))
+
+
+@pytest.mark.parametrize("fixture_name,degree", [("split_curve", 3), ("nonsplit_curve", 4)])
+def test_canonical_field_models_have_small_degree_and_exact_original_coordinates(request, fixture_name, degree):
+    from dissect.utils.canonical_genus4 import canonical_function_field
+
+    curve = request.getfixturevalue(fixture_name)
+    L, coordinates = canonical_function_field(curve)
+    assert L.degree() == degree
+    assert L.genus() == 4
+    assert L is function_field(curve)
+    for polynomial in curve.canonical_polynomials():
+        assert sum(L(coefficient)*prod(value**power for value, power in zip(coordinates, powers))
+                   for powers, coefficient in polynomial.dict().items()) == 0
+
+
+def test_combined_nonsplit_report_completes_normalization_and_preserves_backend_state():
+    report = curve_report(canonical_record(nonsplit=True))
+    for name in ("frobenius_polynomial", "hasse_witt", "genus4_canonical_quadric", "gonality_and_quotients"):
+        assert_ok(report["traits"][name])
+    assert report["traits"]["frobenius_polynomial"]["l_polynomial"] == [1, -4, 2, 24, -102, 168, 98, -1372, 2401]
+    assert report["traits"]["frobenius_polynomial"]["curve_cardinality"] == len(curve_from_dict(canonical_record(nonsplit=True)).curve().rational_points())
+    assert report["traits"]["gonality_and_quotients"]["base_field_gonality"] == 4
+    assert report["coverage"].get("timeout", 0) == 0
 
 
 def test_invalid_canonical_quadric_cubic_intersections_are_rejected():

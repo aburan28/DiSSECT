@@ -239,10 +239,21 @@ six and genus four; this is a non-hyperelliptic canonical model.
 }
 ```
 
-The shared arithmetic, Cartier, Weierstrass and cover traits use this model's
-native Sage function field. This adds general smooth quadric/cubic input,
+The shared arithmetic, Cartier, Weierstrass and cover traits use a Sage
+function field with exact original canonical-coordinate functions. This adds general smooth quadric/cubic input,
 including nonsplit canonical quadrics, beyond the previous cyclic-trigonal
 adapter.
+
+The quadric is parameterized before constructing the function field. A cone
+or split quadric gives an extension of degree three. On a nonsplit quadric,
+a rational curve point and its tangent line give a projection of degree four,
+realizing the linear series `|K-2P|`. A bounded search uses at most 32 affine
+fibers to find that point; if it fails, the exact quadric parameterization
+still supplies a model of degree at most six. This avoids the generic
+space-curve normalization that can exceed the default timeout in Sage 9.8.
+Both original equations are checked in the resulting field. The gonality
+certificate records the projection equation and degree; a verified degree-four
+projection on a nonsplit quadric proves base-field gonality four.
 
 For an existing non-hyperelliptic genus-four function field, the code instead
 recovers the canonical model from a regular differential basis. Quadratic
