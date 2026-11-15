@@ -3,7 +3,7 @@ import json
 import sys
 
 from dissect.traits import TRAITS
-from dissect.utils.custom_curve import CustomCurve
+from dissect.utils.curve_factory import curve_from_dict
 from dissect.utils.database_handler import _cast_sage_types
 
 
@@ -44,7 +44,7 @@ def main():
         curves = curves["curves"]
 
     for curve in curves:
-        curve = CustomCurve(curve)
+        curve = curve_from_dict(curve)
         for params in TRAITS[args.trait].params_iter():
             result = {"curve": curve.name()}
             result["params"] = params

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://gitlab.fi.muni.cz/x408178/curve_analyzer/-/blob/master/LICENSE)
 [![language](https://badgen.net/badge/language/python,sage/purple?list=/)](https://www.sagemath.org/)
-[![traits](https://badgen.net/badge/traits/33/blue)](https://github.com/crocs-muni/DiSSECT/tree/master/dissect/traits)
+[![traits](https://badgen.net/badge/traits/35/blue)](https://github.com/aburan28/DiSSECT/tree/master/dissect/traits)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crocs-muni/DiSSECT/blob/master/dissect/analysis/playground.ipynb#offline=1)
 
 DiSSECT is, to the best of our knowledge, the largest publicly available database of standardized elliptic curves (taken from our [sister project](https://neuromancer.sk/std/)) and offers generation of simulated curves according to the mentioned standards. The tool contains over 20 tests (which we call traits), each computing curve properties, ranging from classical algebraic ones to unconventional ones and those connected to implementations. After obtaining their empirical distributions, the traits allow us to compare the simulated curves to the standard ones. Finally, DiSSECT provides an easy-to-use interface for implementations of custom traits and their interactive visualization via Jupyter notebook.
@@ -83,6 +83,23 @@ To compute traits with database, use:
 dissect-compute-db -t TRAIT_NAME --database DATABASE_URL
 ```
 By default, the command uses all available curves. You can filter them using optional arguments, see the help menu (`-h`).
+
+### Higher-genus curves
+
+This fork also accepts hyperelliptic equations and smooth projective plane
+curves. The `canonical_geometry` trait compares their genus, differential
+space, Jacobian dimension and canonical map with elliptic curves.
+`hyperelliptic_branch` measures the branch divisor and its Frobenius orbits
+in odd characteristic. Existing elliptic traits return null outputs on these
+higher-genus models.
+
+```shell
+dissect-compute-json -t canonical_geometry -i examples/higher_genus_curves.json
+dissect-compute-json -t hyperelliptic_branch -i examples/higher_genus_curves.json
+```
+
+See [the higher-genus guide](docs/higher_genus_traits.md) for the model schema,
+mathematical conventions, limitations and SageMath tests.
 
 ## Performing the analysis
 

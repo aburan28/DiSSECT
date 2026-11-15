@@ -16,7 +16,7 @@ from dissect.utils.database_handler import (
     create_trait_index,
 )
 from dissect.traits import TRAITS
-from dissect.utils.custom_curve import CustomCurve
+from dissect.utils.curve_factory import curve_from_dict
 
 
 def tprint(string):
@@ -39,12 +39,10 @@ def producer(database, trait, args, queue, lock):
         print(f"Computed {computed}/{total}")
         tprint("Producer start")
 
-    curves = map(CustomCurve, get_curves(db, query=vars(args)))
+    curves = map(curve_from_dict, get_curves(db, query=vars(args)))
     counter = 0
     iterator = itertools.product(curves, TRAITS[trait].params_iter())
-    while counter <= args.skip:
-        next(iterator)
-        counter += 1
+    iterator = itertools.islice(iterator, args.skip, None)
 
     for curve, params in iterator:
         queue.put((curve, params), block=True)

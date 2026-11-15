@@ -32,6 +32,8 @@ from .montgomery_form import MontgomeryFormTrait
 from .cm_discriminant_size import CMDiscriminantSizeTrait
 from .field_representation import FieldRepresentationTrait
 from .cheon import CheonTrait
+from .canonical_geometry import CanonicalGeometryTrait
+from .hyperelliptic_branch import HyperellipticBranchTrait
 
 TRAITS = dict(
     map(
@@ -70,6 +72,8 @@ TRAITS = dict(
             CMDiscriminantSizeTrait,
             FieldRepresentationTrait,
             CheonTrait,
+            CanonicalGeometryTrait,
+            HyperellipticBranchTrait,
         ],
     )
 )

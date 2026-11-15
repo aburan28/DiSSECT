@@ -9,6 +9,7 @@ from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
 from dissect.traits import TRAITS
+from dissect.utils.curve_factory import HIGHER_GENUS_FORMS
 
 
 def connect(database: Optional[str] = None) -> Database:
@@ -45,15 +46,17 @@ def _format_curve(curve):
     except:
         pass
 
-    if isinstance(curve["order"], int):
-        c["order"] = hex(curve["order"])
-    elif isinstance(curve["order"], str):  # Workaround for std database
-        c["order"] = hex(int(curve["order"], base=16))
-
-    if isinstance(curve["cofactor"], int):
-        c["cofactor"] = hex(curve["cofactor"])
-    elif isinstance(curve["cofactor"], str):  # Workaround for std database
-        c["cofactor"] = hex(int(curve["cofactor"], base=16))
+    higher_genus = curve["form"] in HIGHER_GENUS_FORMS
+    for key in ("order", "cofactor"):
+        value = curve.get(key) if higher_genus else curve[key]
+        if value is None and higher_genus:
+            c[key] = None
+        elif isinstance(value, int):
+            c[key] = hex(value)
+        elif isinstance(value, str):  # Workaround for std database
+            c[key] = hex(int(value, base=16))
+    if higher_genus and "genus" in curve:
+        c["genus"] = curve["genus"]
 
     c["standard"] = curve.get("standard", False if "sim" in curve["category"] else True)
     c["example"] = curve.get("example", False)
@@ -237,7 +240,8 @@ def store_trait_result(
     trait_result["curve"]["category"] = curve.category()
     trait_result["curve"]["bits"] = curve.q().nbits()
     trait_result["curve"]["field_type"] = curve.field_type()
-    trait_result["curve"]["cofactor"] = hex(curve.cofactor())
+    cofactor = curve.cofactor()
+    trait_result["curve"]["cofactor"] = hex(cofactor) if cofactor is not None else None
     trait_result["curve"] = _cast_sage_types(trait_result["curve"])
     trait_result["params"] = _cast_sage_types(params)
     trait_result["result"] = _encode_ints(result)

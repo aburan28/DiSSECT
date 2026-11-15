@@ -7,11 +7,15 @@ class Trait:
     INPUT = {}
     OUTPUT = {}
     DEFAULT_PARAMS = {}
+    SUPPORTED_CURVE_TYPES = ("elliptic",)
 
     def __init__(self):
         pass
 
     def __call__(self, curve, **params):
+        curve_type = getattr(curve, "curve_type", lambda: "elliptic")()
+        if curve_type not in self.SUPPORTED_CURVE_TYPES:
+            return dict.fromkeys(self.OUTPUT)
         return self.compute(curve, params)
 
     def compute(self, curve, params):
