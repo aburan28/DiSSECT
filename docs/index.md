@@ -30,6 +30,8 @@ crosses it is a *simulated* one.
 
 [Higher-genus curves: canonical geometry and hyperelliptic branch traits →]({{ '/higher_genus_traits.html' | relative_url }})
 
+[Detailed arithmetic, invariants, automorphisms and ramification of covers →]({{ '/detailed_cover_traits.html' | relative_url }})
+
 ## What was actually interesting
 
 The outlier result is not a curve-security verdict.  In particular, the

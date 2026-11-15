@@ -5,10 +5,15 @@ title: Higher-genus curve traits
 
 # Higher-genus curve traits
 
-The fork supports two higher-genus models alongside the existing elliptic
-models: `Hyperelliptic` and `SmoothPlane`. Input is validated with SageMath;
+The fork supports three higher-genus models alongside the existing elliptic
+models: `Hyperelliptic`, `SmoothPlane` and `CyclicTrigonal`. Input is validated with SageMath;
 genus and curve family come from the model, rather than an unverified label.
 Both `dissect-compute-json` and `dissect-compute-db` use this dispatch.
+
+The [detailed covers reference](detailed_cover_traits.md) describes nine
+additional arithmetic and geometric traits, full ramification for wild double
+covers, verified maps to positive-genus targets, cyclic trigonal input and the
+combined `dissect-higher-genus-report` command.
 
 ## Traits and mathematical conventions
 
@@ -123,11 +128,13 @@ cofactor. They are metadata, not verified point counts. Missing values stay
 null through database import and result storage. No elliptic Frobenius-trace
 formula is applied to them.
 
-This model set does not represent every non-hyperelliptic curve. For example,
-general genus-four canonical curves need a quadric/cubic intersection in P^3.
-Those require a future validated model adapter. The current traits compute
-canonical-map invariants, not explicit canonical coordinates, Jacobian
-decompositions, torsion groups or full Weierstrass gap sequences.
+This model set does not represent every non-hyperelliptic curve. Cyclic
+trigonal models now cover some non-plane genus-four curves, but general
+quadric/cubic intersections in P^3 need another model adapter. The original
+two traits compute canonical-map invariants and tame branch data. The newer
+detailed traits compute isogeny decomposition, full Weierstrass gap loci and
+local different divisors; they do not implement general Jacobian group
+arithmetic or construct explicit canonical coordinates.
 
 ## Running and testing
 

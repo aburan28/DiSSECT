@@ -34,6 +34,15 @@ from .field_representation import FieldRepresentationTrait
 from .cheon import CheonTrait
 from .canonical_geometry import CanonicalGeometryTrait
 from .hyperelliptic_branch import HyperellipticBranchTrait
+from .frobenius_polynomial import FrobeniusPolynomialTrait
+from .jacobian_decomposition import JacobianDecompositionTrait
+from .hasse_witt import HasseWittTrait
+from .newton_polygon import NewtonPolygonTrait
+from .weierstrass_gaps import WeierstrassGapsTrait
+from .automorphism_structure import AutomorphismStructureTrait
+from .moduli_invariants import ModuliInvariantsTrait
+from .gonality_and_quotients import GonalityAndQuotientsTrait
+from .cover_ramification import CoverRamificationTrait
 
 TRAITS = dict(
     map(
@@ -74,6 +83,15 @@ TRAITS = dict(
             CheonTrait,
             CanonicalGeometryTrait,
             HyperellipticBranchTrait,
+            FrobeniusPolynomialTrait,
+            JacobianDecompositionTrait,
+            HasseWittTrait,
+            NewtonPolygonTrait,
+            WeierstrassGapsTrait,
+            AutomorphismStructureTrait,
+            ModuliInvariantsTrait,
+            GonalityAndQuotientsTrait,
+            CoverRamificationTrait,
         ],
     )
 )

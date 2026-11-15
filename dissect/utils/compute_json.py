@@ -27,8 +27,15 @@ def main():
     parser.add_argument(
         "-o", "--output", type=str, help="Output file (stdout by default)", default=None
     )
+    parser.add_argument("--params", type=json.loads, default={},
+                        help='JSON object overriding trait parameters, e.g. {"timeout":60}')
 
     args = parser.parse_args()
+    if not isinstance(args.params, dict):
+        parser.error("--params must be a JSON object")
+    unknown = set(args.params)-set(TRAITS[args.trait].DEFAULT_PARAMS)
+    if unknown:
+        parser.error("Unknown trait parameters: " + ", ".join(sorted(unknown)))
     if args.trait not in TRAITS:
         print(f"Trait {args.trait} is not implemented", file=sys.stderr)
         sys.exit(1)
@@ -45,7 +52,7 @@ def main():
 
     for curve in curves:
         curve = curve_from_dict(curve)
-        for params in TRAITS[args.trait].params_iter():
+        for params in TRAITS[args.trait].params_iter(args.params):
             result = {"curve": curve.name()}
             result["params"] = params
             result["result"] = TRAITS[args.trait](curve, **params)

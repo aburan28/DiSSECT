@@ -22,15 +22,21 @@ def field_element(value, field):
 
 class HigherGenusCurve:
     def __init__(self, description):
-        from sage.all import Curve, HyperellipticCurve, PolynomialRing, ProjectiveSpace, ZZ
+        from sage.all import Curve, HyperellipticCurve, PolynomialRing, ProjectiveSpace, FunctionField, ZZ
 
         self._name = description["name"]
         self._category = description["category"]
         self._form = description["form"]
         self._field_type = description["field"]["type"]
+        self._field_description = description["field"]
         self._field = field_from_dict(description["field"])
         self._standard = description.get("standard", "sim" not in self._name)
         self._example = description.get("example", False)
+        self._analysis = description.get("analysis", {})
+        if not isinstance(self._analysis, dict) or not isinstance(self._analysis.get("maps", []), list):
+            raise ValueError("analysis must be an object containing a maps list")
+        if any(not isinstance(mapping, dict) for mapping in self._analysis.get("maps", [])):
+            raise ValueError("Each declared map must be an object")
         self._order = description.get("order")
         self._cofactor = description.get("cofactor")
         if (self._order is None) != (self._cofactor is None):
@@ -49,6 +55,21 @@ class HigherGenusCurve:
             self._genus = int(self._curve.genus())
             self._polynomials = f, h
             self._curve_type = "hyperelliptic"
+        elif self._form == "CyclicTrigonal":
+            if self._field.characteristic() == 3:
+                raise ValueError("CyclicTrigonal requires characteristic different from three")
+            ring = PolynomialRing(self._field, "x")
+            f = ring([field_element(c, self._field) for c in params["f"]])
+            if f.degree() < 4 or not f.is_squarefree():
+                raise ValueError("CyclicTrigonal requires a squarefree polynomial of degree >= 4")
+            K = FunctionField(self._field, "x")
+            equation_ring = PolynomialRing(K, "y")
+            L = K.extension(equation_ring.gen()**3-f(K.gen()), "y")
+            self._curve = L
+            self._cover_function_field = L
+            self._cover_polynomial = f
+            self._genus = int(L.genus())
+            self._curve_type = "non_hyperelliptic"
         elif self._form == "SmoothPlane":
             ring = PolynomialRing(self._field, names=("x", "y", "z"))
             polynomial = ring.zero()
@@ -64,6 +85,7 @@ class HigherGenusCurve:
                 raise ValueError("SmoothPlane requires a homogeneous polynomial of degree >= 4")
             ambient = ProjectiveSpace(self._field, 2, names=("x", "y", "z"))
             self._curve = Curve(polynomial, ambient)
+            self._plane_polynomial = polynomial
             if not self._curve.is_smooth():
                 raise ValueError("SmoothPlane requires a geometrically smooth curve")
             degree = int(polynomial.degree())
@@ -94,6 +116,9 @@ class HigherGenusCurve:
     def field_type(self):
         return self._field_type
 
+    def field_description(self):
+        return self._field_description
+
     def q(self):
         return self._field.cardinality()
 
@@ -115,6 +140,9 @@ class HigherGenusCurve:
     def curve_type(self):
         return self._curve_type
 
+    def model_type(self):
+        return self._form
+
     def genus(self):
         return self._genus
 
@@ -125,3 +153,17 @@ class HigherGenusCurve:
         if not self.is_hyperelliptic():
             raise ValueError("This model is not hyperelliptic")
         return self._polynomials
+
+    def plane_polynomial(self):
+        if self._form != "SmoothPlane":
+            raise ValueError("This model is not a smooth plane curve")
+        return self._plane_polynomial
+
+    def analysis(self):
+        return self._analysis
+
+    def cover_function_field(self):
+        return self._cover_function_field
+
+    def cover_polynomial(self):
+        return self._cover_polynomial

@@ -55,7 +55,7 @@ def test_existing_traits_do_not_apply_elliptic_formulas_to_higher_genus(family):
 
     curve = CurveWithoutEllipticMethods()
     for name, trait in TRAITS.items():
-        if name not in ("canonical_geometry", "hyperelliptic_branch"):
+        if trait.SUPPORTED_CURVE_TYPES == ("elliptic",):
             assert trait(curve) == dict.fromkeys(trait.OUTPUT)
 
 

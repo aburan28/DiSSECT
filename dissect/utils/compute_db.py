@@ -1,7 +1,7 @@
 import argparse
 import itertools
 import datetime
-from math import prod
+import json
 from multiprocessing import Process, Queue, Lock
 
 from pymongo.errors import ServerSelectionTimeoutError
@@ -30,9 +30,8 @@ def producer(database, trait, args, queue, lock):
     with lock:
         tprint("Preliminary check")
 
-    total = get_curves_count(db, query=vars(args)) * prod(
-        map(len, TRAITS[trait].params().values())
-    )
+    parameters = list(TRAITS[trait].params_iter(getattr(args, "params", {})))
+    total = get_curves_count(db, query=vars(args)) * len(parameters)
     computed = get_trait_results_count(db, trait, query=vars(args))
 
     with lock:
@@ -41,7 +40,7 @@ def producer(database, trait, args, queue, lock):
 
     curves = map(curve_from_dict, get_curves(db, query=vars(args)))
     counter = 0
-    iterator = itertools.product(curves, TRAITS[trait].params_iter())
+    iterator = itertools.product(curves, parameters)
     iterator = itertools.islice(iterator, args.skip, None)
 
     for curve, params in iterator:
@@ -138,6 +137,7 @@ def main():
         help="Database URI (default: mongodb://localhost:27017/)",
     )
     parser.add_argument("--verbose", action="store_true", default=False)
+    parser.add_argument("--params", type=json.loads, default={}, help="JSON object of trait parameter overrides")
     parser.add_argument(
         "--skip",
         type=int,
@@ -146,6 +146,13 @@ def main():
     )
 
     args = parser.parse_args()
+    if args.trait_name not in TRAITS:
+        parser.error("Unknown trait: " + args.trait_name)
+    if not isinstance(args.params, dict):
+        parser.error("--params must be a JSON object")
+    unknown = set(args.params)-set(TRAITS[args.trait_name].DEFAULT_PARAMS)
+    if unknown:
+        parser.error("Unknown trait parameters: " + ", ".join(sorted(unknown)))
 
     queue = Queue(1000)
     lock = Lock()

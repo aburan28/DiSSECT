@@ -57,6 +57,8 @@ def _format_curve(curve):
             c[key] = hex(int(value, base=16))
     if higher_genus and "genus" in curve:
         c["genus"] = curve["genus"]
+    if higher_genus and "analysis" in curve:
+        c["analysis"] = curve["analysis"]
 
     c["standard"] = curve.get("standard", False if "sim" in curve["category"] else True)
     c["example"] = curve.get("example", False)

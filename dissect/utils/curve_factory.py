@@ -1,7 +1,7 @@
 """Dispatch database models without treating a Jacobian as an elliptic curve."""
 
 
-HIGHER_GENUS_FORMS = ("Hyperelliptic", "SmoothPlane")
+HIGHER_GENUS_FORMS = ("Hyperelliptic", "SmoothPlane", "CyclicTrigonal")
 
 
 def field_from_dict(description):
