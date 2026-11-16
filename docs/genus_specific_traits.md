@@ -20,11 +20,14 @@ field and completeness separately.
 | 4 | `genus4_canonical_quadric` | Canonical quadric/cubic, cone versus split/nonsplit quadric, explicit trigonal pencils, descent and automorphism action |
 | 4 | `genus4_tritangents` | Odd-theta tritangent planes, contact divisors, Frobenius action, even-theta pencil planes and incidences |
 
-The registry has 50 traits. These six expose 103 top-level fields, with contact
+The registry has 56 traits. These six expose 103 top-level fields, with contact
 forms, matrices, permutations and maps nested in the records. Their schemas
 and parameter bounds are available as `TRAITS[name].OUTPUT` and
 `TRAITS[name].DEFAULT_PARAMS`. See the [common reference](detailed_cover_traits.md)
 for status semantics, timeouts and exact finite-field serialization.
+The [further traits guide](more_higher_genus_traits.md) adds Richelot isogenies,
+twists, Jacobian torsion, effective divisors, CM orders and canonical equations
+across genera, including genus five.
 
 ## Running the examples
 

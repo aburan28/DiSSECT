@@ -36,13 +36,16 @@ The combined report constructs each model once and shares successful
 function-field and L-polynomial computations between traits. The individual
 report includes the input model, field, effective parameters and Sage/Python
 versions for reproducibility. The individual
-trait registry now contains 50 traits. The fifteen detailed traits expose 237
+trait registry now contains 56 traits. The twenty-one detailed traits expose 338
 top-level output fields, including status and scope fields; matrix entries,
 local fibers, invariant coordinates and place records are structured data.
 Use `TRAITS[name].OUTPUT` to inspect the full schema and descriptions.
 The six newer [genus-specific traits](genus_specific_traits.md) are included
 automatically in combined reports and return `not_applicable` outside their
 genus and model class.
+Six further [genus-two-and-higher traits](more_higher_genus_traits.md) add
+Richelot targets, involution twists, torsion modules, symmetric powers, CM
+orders and canonical syzygies. They share the same report and status conventions.
 
 | Trait | Main computations | Scope recorded explicitly |
 | --- | --- | --- |

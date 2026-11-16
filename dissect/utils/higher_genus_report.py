@@ -16,6 +16,8 @@ REPORT_TRAITS = (
     "automorphism_structure", "moduli_invariants", "gonality_and_quotients", "cover_ramification",
     "genus2_rosenhain", "genus2_elliptic_quotients", "genus3_bitangents", "genus3_flexes",
     "genus4_canonical_quadric", "genus4_tritangents",
+    "genus2_richelot", "hyperelliptic_twists", "jacobian_torsion",
+    "symmetric_power_divisors", "frobenius_orders", "canonical_relations",
 )
 
 
