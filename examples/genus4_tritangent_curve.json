@@ -1,0 +1,26 @@
+{
+  "curves": [
+    {
+      "name": "genus4-cone-tritangents",
+      "category": "genus_specific_examples",
+      "example": true,
+      "standard": false,
+      "form": "CyclicTrigonal",
+      "field": {
+        "type": "Prime",
+        "p": "0x5",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          0,
+          -1,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    }
+  ]
+}

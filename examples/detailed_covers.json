@@ -1,0 +1,93 @@
+{
+  "curves": [
+    {
+      "name": "genus2-elliptic-quotient",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {"type": "Prime", "p": "0x7", "bits": 3},
+      "params": {"f": [1, 0, 0, 0, 0, 0, 1]},
+      "analysis": {
+        "maps": [
+          {
+            "name": "degree-two-elliptic-quotient",
+            "x": {"numerator": [{"coeff": 1, "powers": [2, 0]}]},
+            "y": {"numerator": [{"coeff": 1, "powers": [0, 1]}]},
+            "target": {"form": "Hyperelliptic", "params": {"f": [1, 0, 0, 1]}}
+          },
+          {
+            "name": "degree-four-map-to-line",
+            "x": {"numerator": [{"coeff": 1, "powers": [2, 0]}]}
+          },
+          {
+            "name": "inseparable-degree-seven-followed-by-double-cover",
+            "x": {"numerator": [{"coeff": 1, "powers": [7, 0]}]}
+          }
+        ]
+      }
+    },
+    {
+      "name": "wild-genus2-artin-schreier",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {"type": "Prime", "p": "0x2", "bits": 2},
+      "params": {"f": [1, 0, 0, 1, 0, 1], "h": [1]}
+    },
+    {
+      "name": "cartier-rank-one-p-rank-zero",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {"type": "Prime", "p": "0x3", "bits": 2},
+      "params": {"f": [1, 0, 0, 0, 0, 1]}
+    },
+    {
+      "name": "genus3-hyperelliptic-shioda",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {"type": "Prime", "p": "0xb", "bits": 4},
+      "params": {"f": [0, -1, 0, 0, 0, 0, 0, 1]}
+    },
+    {
+      "name": "genus3-plane-quartic-dixmier-ohno",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "SmoothPlane",
+      "field": {"type": "Prime", "p": "0xb", "bits": 4},
+      "params": {"polynomial": [
+        {"coeff": 1, "powers": [4, 0, 0]},
+        {"coeff": 1, "powers": [0, 4, 0]},
+        {"coeff": 1, "powers": [0, 0, 4]}
+      ]}
+    },
+    {
+      "name": "nonclassical-hermitian-quartic",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "SmoothPlane",
+      "field": {"type": "Prime", "p": "0x3", "bits": 2},
+      "params": {"polynomial": [
+        {"coeff": 1, "powers": [4, 0, 0]},
+        {"coeff": 1, "powers": [0, 4, 0]},
+        {"coeff": 1, "powers": [0, 0, 4]}
+      ]}
+    },
+    {
+      "name": "nonplane-genus4-cyclic-trigonal",
+      "category": "detailed_cover_examples",
+      "example": true,
+      "standard": false,
+      "form": "CyclicTrigonal",
+      "field": {"type": "Prime", "p": "0x7", "bits": 3},
+      "params": {"f": [0, -1, 0, 0, 0, 1]}
+    }
+  ]
+}

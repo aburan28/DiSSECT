@@ -7,11 +7,15 @@ class Trait:
     INPUT = {}
     OUTPUT = {}
     DEFAULT_PARAMS = {}
+    SUPPORTED_CURVE_TYPES = ("elliptic",)
 
     def __init__(self):
         pass
 
     def __call__(self, curve, **params):
+        curve_type = getattr(curve, "curve_type", lambda: "elliptic")()
+        if curve_type not in self.SUPPORTED_CURVE_TYPES:
+            return dict.fromkeys(self.OUTPUT)
         return self.compute(curve, params)
 
     def compute(self, curve, params):
@@ -20,9 +24,15 @@ class Trait:
     def params(self):
         return dict(self.DEFAULT_PARAMS)
 
-    def params_iter(self):
-        for params_values in itertools.product(*self.DEFAULT_PARAMS.values()):
-            yield dict(zip(self.DEFAULT_PARAMS.keys(), params_values))
+    def params_iter(self, overrides=None):
+        choices = dict(self.DEFAULT_PARAMS)
+        overrides = overrides or {}
+        unknown = set(overrides)-set(choices)
+        if unknown:
+            raise ValueError("Unknown trait parameters: " + ", ".join(sorted(unknown)))
+        choices.update({key: [value] for key, value in overrides.items()})
+        for params_values in itertools.product(*choices.values()):
+            yield dict(zip(choices.keys(), params_values))
 
     def numeric_outputs(self):
         outputs = []

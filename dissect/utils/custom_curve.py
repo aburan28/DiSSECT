@@ -6,8 +6,9 @@ from sage.all import (
     PolynomialRing,
     sqrt,
 )  # import sage library
-from dissect.utils.curve_form import dict_to_poly, CurveForm
+from dissect.utils.curve_form import CurveForm
 from dissect.utils.utils import Factorization
+from dissect.utils.curve_factory import field_from_dict
 
 
 class CustomCurve:
@@ -48,6 +49,16 @@ class CustomCurve:
 
     def name(self):
         return self._name
+
+    def curve_type(self):
+        return "elliptic"
+
+    def genus(self):
+        return 1
+
+    def is_hyperelliptic(self):
+        """Use the genus >= 2 convention for the hyperelliptic family."""
+        return False
 
     def order(self):
         return self._order
@@ -154,18 +165,9 @@ class CustomCurve:
 
     def set_field(self, field_dict):
         self._field_type = field_dict["type"]
-        if field_dict["type"] == "Prime":
-            p = ZZ(field_dict["p"])
-            self._field = GF(p, proof=False)
-            self._q = p
-            self._field_bits = self._q.nbits()
-        else:
-            base = ZZ(2) if field_dict["type"] == "Binary" else ZZ(field_dict["base"])
-            degree = ZZ(field_dict["degree"])
-            modulus = dict_to_poly(field_dict["poly"], GF(base)["w"])
-            self._field = GF(base**degree, "w", modulus, proof=False)
-            self._q = base**degree
-            self._field_bits = self._q.nbits()
+        self._field = field_from_dict(field_dict)
+        self._q = self._field.cardinality()
+        self._field_bits = self._q.nbits()
 
     def set_form(self, form_desc):
         if form_desc in ["Edwards", "TwistedEdwards"]:

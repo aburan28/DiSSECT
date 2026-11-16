@@ -1,0 +1,39 @@
+{
+  "curves": [
+    {
+      "name": "elliptic-genus-1",
+      "category": "geometry_examples",
+      "example": true,
+      "standard": false,
+      "form": "Weierstrass",
+      "field": {"type": "Prime", "p": "0x7", "bits": 3},
+      "params": {"a": {"raw": "0x1"}, "b": {"raw": "0x1"}},
+      "order": "0x5",
+      "cofactor": "0x1"
+    },
+    {
+      "name": "hyperelliptic-genus-2",
+      "category": "geometry_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {"type": "Prime", "p": "0x7", "bits": 3},
+      "params": {"f": [0, -1, 0, 0, 0, 1], "h": [0]}
+    },
+    {
+      "name": "non-hyperelliptic-genus-3",
+      "category": "geometry_examples",
+      "example": true,
+      "standard": false,
+      "form": "SmoothPlane",
+      "field": {"type": "Prime", "p": "0x7", "bits": 3},
+      "params": {
+        "polynomial": [
+          {"coeff": 1, "powers": [4, 0, 0]},
+          {"coeff": 1, "powers": [0, 4, 0]},
+          {"coeff": 1, "powers": [0, 0, 4]}
+        ]
+      }
+    }
+  ]
+}

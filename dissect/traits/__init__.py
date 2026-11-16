@@ -32,6 +32,23 @@ from .montgomery_form import MontgomeryFormTrait
 from .cm_discriminant_size import CMDiscriminantSizeTrait
 from .field_representation import FieldRepresentationTrait
 from .cheon import CheonTrait
+from .canonical_geometry import CanonicalGeometryTrait
+from .hyperelliptic_branch import HyperellipticBranchTrait
+from .frobenius_polynomial import FrobeniusPolynomialTrait
+from .jacobian_decomposition import JacobianDecompositionTrait
+from .hasse_witt import HasseWittTrait
+from .newton_polygon import NewtonPolygonTrait
+from .weierstrass_gaps import WeierstrassGapsTrait
+from .automorphism_structure import AutomorphismStructureTrait
+from .moduli_invariants import ModuliInvariantsTrait
+from .gonality_and_quotients import GonalityAndQuotientsTrait
+from .cover_ramification import CoverRamificationTrait
+from .genus2_rosenhain import Genus2RosenhainTrait
+from .genus2_elliptic_quotients import Genus2EllipticQuotientsTrait
+from .genus3_bitangents import Genus3BitangentsTrait
+from .genus3_flexes import Genus3FlexesTrait
+from .genus4_canonical_quadric import Genus4CanonicalQuadricTrait
+from .genus4_tritangents import Genus4TritangentsTrait
 
 TRAITS = dict(
     map(
@@ -70,6 +87,23 @@ TRAITS = dict(
             CMDiscriminantSizeTrait,
             FieldRepresentationTrait,
             CheonTrait,
+            CanonicalGeometryTrait,
+            HyperellipticBranchTrait,
+            FrobeniusPolynomialTrait,
+            JacobianDecompositionTrait,
+            HasseWittTrait,
+            NewtonPolygonTrait,
+            WeierstrassGapsTrait,
+            AutomorphismStructureTrait,
+            ModuliInvariantsTrait,
+            GonalityAndQuotientsTrait,
+            CoverRamificationTrait,
+            Genus2RosenhainTrait,
+            Genus2EllipticQuotientsTrait,
+            Genus3BitangentsTrait,
+            Genus3FlexesTrait,
+            Genus4CanonicalQuadricTrait,
+            Genus4TritangentsTrait,
         ],
     )
 )
