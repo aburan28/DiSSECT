@@ -1,0 +1,217 @@
+{
+  "curves": [
+    {
+      "name": "genus2-ordinary-maximal-cm-order",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0x5",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          0,
+          2,
+          0,
+          1,
+          0,
+          1
+        ],
+        "h": []
+      }
+    },
+    {
+      "name": "genus2-nonmaximal-weil-order",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0x5",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          1,
+          1,
+          0,
+          2,
+          0,
+          1
+        ],
+        "h": []
+      }
+    },
+    {
+      "name": "genus2-richelot-split-branches",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0xb",
+        "bits": 4
+      },
+      "params": {
+        "f": [
+          0,
+          30,
+          -61,
+          41,
+          -11,
+          1
+        ],
+        "h": []
+      }
+    },
+    {
+      "name": "genus2-artin-schreier-twist",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0x2",
+        "bits": 2
+      },
+      "params": {
+        "f": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          1
+        ],
+        "h": [
+          1
+        ]
+      }
+    },
+    {
+      "name": "genus3-canonical-quartic",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "SmoothPlane",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "polynomial": [
+          {
+            "coeff": 1,
+            "powers": [
+              4,
+              0,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              4,
+              0
+            ]
+          },
+          {
+            "coeff": 1,
+            "powers": [
+              0,
+              0,
+              4
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "genus4-rational-normal-canonical-image",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "h": []
+      }
+    },
+    {
+      "name": "genus5-rational-normal-canonical-image",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "Hyperelliptic",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "h": []
+      }
+    },
+    {
+      "name": "genus4-quadric-cubic-canonical-image",
+      "category": "more_higher_genus_examples",
+      "example": true,
+      "standard": false,
+      "form": "CyclicTrigonal",
+      "field": {
+        "type": "Prime",
+        "p": "0x7",
+        "bits": 3
+      },
+      "params": {
+        "f": [
+          0,
+          -1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "h": []
+      }
+    }
+  ]
+}

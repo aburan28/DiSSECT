@@ -16,6 +16,8 @@ covers, verified maps to positive-genus targets, cyclic trigonal input and the
 combined `dissect-higher-genus-report` command.
 The [genus-specific guide](genus_specific_traits.md) adds explicit branch,
 bitangent, flex, ruling and tritangent configurations for genera two to four.
+The [further higher-genus guide](more_higher_genus_traits.md) covers Richelot
+isogenies, twists, torsion, effective divisors, CM orders and canonical syzygies.
 
 ## Traits and mathematical conventions
 

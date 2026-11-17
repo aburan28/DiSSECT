@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://gitlab.fi.muni.cz/x408178/curve_analyzer/-/blob/master/LICENSE)
 [![language](https://badgen.net/badge/language/python,sage/purple?list=/)](https://www.sagemath.org/)
-[![traits](https://badgen.net/badge/traits/50/blue)](https://github.com/aburan28/DiSSECT/tree/master/dissect/traits)
+[![traits](https://badgen.net/badge/traits/56/blue)](https://github.com/aburan28/DiSSECT/tree/master/dissect/traits)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/crocs-muni/DiSSECT/blob/master/dissect/analysis/playground.ipynb#offline=1)
 
 DiSSECT is, to the best of our knowledge, the largest publicly available database of standardized elliptic curves (taken from our [sister project](https://neuromancer.sk/std/)) and offers generation of simulated curves according to the mentioned standards. The tool contains over 20 tests (which we call traits), each computing curve properties, ranging from classical algebraic ones to unconventional ones and those connected to implementations. After obtaining their empirical distributions, the traits allow us to compare the simulated curves to the standard ones. Finally, DiSSECT provides an easy-to-use interface for implementations of custom traits and their interactive visualization via Jupyter notebook.
@@ -125,6 +125,19 @@ are returned as exact structured data.
 dissect-higher-genus-report -i examples/genus_specific_curves.json -o genera-report.json
 dissect-compute-json -t genus3_bitangents -i examples/higher_genus_curves.json --params '{"extension_degree":2,"timeout":120}'
 dissect-compute-json -t genus4_tritangents -i examples/genus4_tritangent_curve.json --params '{"extension_degree":2,"max_incidence_tests":10,"timeout":120}'
+```
+
+Six more [traits for genus two and higher](docs/more_higher_genus_traits.md)
+compute Richelot isogeny targets, explicit hyperelliptic twists, Jacobian
+torsion ranks and rigorous bounds, symmetric-power and effective-divisor
+counts, Frobenius-generated CM orders, and canonical equations and linear
+syzygies. These include hyperelliptic canonical images in genera four and
+five, with exact source-field equation checks.
+
+```shell
+dissect-higher-genus-report -i examples/more_higher_genus_curves.json -o more-genera-report.json
+dissect-compute-json -t jacobian_torsion -i examples/more_higher_genus_curves.json --params '{"ell":3,"extension_bound":12}'
+dissect-compute-json -t canonical_relations -i examples/more_higher_genus_curves.json
 ```
 
 ## Performing the analysis

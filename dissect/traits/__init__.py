@@ -49,6 +49,12 @@ from .genus3_bitangents import Genus3BitangentsTrait
 from .genus3_flexes import Genus3FlexesTrait
 from .genus4_canonical_quadric import Genus4CanonicalQuadricTrait
 from .genus4_tritangents import Genus4TritangentsTrait
+from .genus2_richelot import Genus2RichelotTrait
+from .hyperelliptic_twists import HyperellipticTwistsTrait
+from .jacobian_torsion import JacobianTorsionTrait
+from .symmetric_power_divisors import SymmetricPowerDivisorsTrait
+from .frobenius_orders import FrobeniusOrdersTrait
+from .canonical_relations import CanonicalRelationsTrait
 
 TRAITS = dict(
     map(
@@ -104,6 +110,12 @@ TRAITS = dict(
             Genus3FlexesTrait,
             Genus4CanonicalQuadricTrait,
             Genus4TritangentsTrait,
+            Genus2RichelotTrait,
+            HyperellipticTwistsTrait,
+            JacobianTorsionTrait,
+            SymmetricPowerDivisorsTrait,
+            FrobeniusOrdersTrait,
+            CanonicalRelationsTrait,
         ],
     )
 )

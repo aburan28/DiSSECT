@@ -10,7 +10,7 @@ NAMES = ("genus2_rosenhain", "genus2_elliptic_quotients", "genus3_bitangents",
 
 
 def test_genus_specific_traits_are_registered_with_report_and_limits():
-    assert len(TRAITS) == 50
+    assert len(TRAITS) == 56
     assert "CanonicalGenus4" in HIGHER_GENUS_FORMS
     for name in NAMES:
         trait = TRAITS[name]
